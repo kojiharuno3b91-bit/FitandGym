@@ -709,7 +709,9 @@
       ha_suggest_maintain:'💡 根據您的狀態，建議每日攝取約 <strong>{kcal} 大卡</strong> 以維持目前體重。',
       ha_suggest_loss:'💡 為了達到減重目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (產生熱量缺口)。',
       ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。',
-      th_action: '操作', btn_analyze: '🔍 智能分析', modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議'
+      th_action: '操作', btn_analyze: '🔍 智能分析', modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議',ref_title: '參考資料',
+      ref_desc: '點擊下方連結下載我們的最新宣傳海報與價目表',
+      ref_link: '下載宣傳海報',
     },
     en: {
       nav_admin:'Admin Panel', hero_title:'Your Personalized <span style="color:var(--red)">Fitness Plan</span>', hero_subtitle:'Fill in your personal details and dietary habits. We will craft the perfect fitness and nutrition plan tailored just for you.',
@@ -739,7 +741,9 @@
       ha_suggest_maintain:'💡 To maintain your weight, consume approx. <strong>{kcal} kcal</strong> daily.',
       ha_suggest_loss:'💡 For weight loss, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric deficit).',
       ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).',
-      th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions'
+      th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions',      ref_title: 'Reference Materials',
+      ref_desc: 'Click the link below to download our latest poster and price list',
+      ref_link: 'Download Poster',
     },
     ja: {
       nav_admin:'管理パネル', hero_title:'あなた専用の<span style="color:var(--red)">フィットネスプラン</span>', hero_subtitle:'個人情報と食習慣をご入力ください。最適なフィットネス・栄養プランを作成します。',
@@ -769,7 +773,9 @@
       ha_suggest_maintain:'💡 現在の体重を維持するため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします。',
       ha_suggest_loss:'💡 減量のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリー不足を作る）。',
       ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。',
-      th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案'
+      th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案',      ref_title: '参考資料',
+      ref_desc: '最新のポスターと料金表をダウンロードするには、下のリンクをクリックしてください',
+      ref_link: 'ポスターをダウンロード',
     }
   };
 
@@ -1161,6 +1167,15 @@
   function closeRecModal() {
     document.getElementById('recModal').classList.remove('active');
   }
+  function forceDownload(e, url, filename) {
+  if (e) e.preventDefault();
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || 'FitZone_poster.jpg';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>
 </body>
 </html>
