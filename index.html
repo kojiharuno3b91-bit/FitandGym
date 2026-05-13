@@ -170,14 +170,28 @@
     .checkbox-item:hover { transform: translateY(-2px); background: #eef1f6; }
     .checkbox-item:has(input:checked) { border-color: var(--red); background: #fff0f3; transform: scale(1.03); font-weight: bold; color: var(--red); }
 
-    /* BMI 互動回饋徽章 */
-    .bmi-feedback {
-      display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 6px 14px;
-      border-radius: 20px; font-size: 0.85rem; font-weight: 800;
-      opacity: 0; transform: translateY(-10px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      max-height: 0; overflow: hidden;
+    /* ===== 健康分析面板 (新增) ===== */
+    .health-analysis-panel {
+      background: linear-gradient(135deg, #f8f9fa, #eef1f6);
+      border-radius: 16px; padding: 22px; margin-top: 10px; margin-bottom: 24px;
+      border: 1px solid #e1e4e8; display: none;
+      animation: fadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .bmi-feedback.show { opacity: 1; transform: translateY(0); max-height: 50px; margin-bottom: 10px; }
+    .analysis-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 16px;
+    }
+    .analysis-card {
+      background: white; padding: 16px; border-radius: 12px; text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 2px solid transparent; transition: all 0.3s;
+    }
+    .analysis-title { font-size: 0.85rem; color: #666; margin-bottom: 8px; font-weight: 700; }
+    .analysis-value { font-size: 1.6rem; font-weight: 900; color: var(--dark); }
+    .analysis-value small { font-size: 0.8rem; color: #999; font-weight: normal; }
+    .analysis-desc { font-size: 0.8rem; font-weight: 800; margin-top: 6px; padding: 4px 8px; border-radius: 12px; display: inline-block; }
+    .analysis-suggestion {
+      background: rgba(233,69,96,0.08); border-left: 4px solid var(--red);
+      padding: 14px 18px; border-radius: 0 8px 8px 0; font-size: 0.92rem; color: #444; line-height: 1.6; font-weight: 600;
+    }
 
     .submit-btn {
       width: 100%; padding: 16px; background: linear-gradient(135deg, #e94560, #c73652);
@@ -256,7 +270,6 @@
     }
     .modal-close:hover { background: var(--red); color: white; transform: rotate(90deg); }
     
-    /* 後台其餘樣式保持不變... */
     .admin-login { max-width: 380px; margin: 0 auto; text-align: center; }
     .admin-login .lock-icon { font-size: 3rem; margin-bottom: 16px; }
     .admin-login h2 { margin-bottom: 6px; color: var(--dark); font-size: 1.5rem; }
@@ -437,9 +450,6 @@
           <input type="number" id="f_weight" min="20" max="300" required data-i18n-placeholder="placeholder_weight" placeholder="65" />
         </div>
       </div>
-      
-      <!-- BMI 互動徽章顯示區 -->
-      <div id="bmiBadge" class="bmi-feedback"></div>
 
       <!-- Fitness Goals -->
       <div class="form-section-head">🎯 <span data-i18n="section_goals">健身目標</span></div>
@@ -462,6 +472,29 @@
           <option value="exercise_regular" data-i18n="exercise_regular">規律運動</option>
           <option value="exercise_intense" data-i18n="exercise_intense">高強度訓練</option>
         </select>
+      </div>
+
+      <!-- 健康數據分析面板 (動態顯示) -->
+      <div id="healthAnalysisPanel" class="health-analysis-panel">
+        <div class="form-section-head" style="margin-top:0;">📊 <span data-i18n="section_health_analysis">專屬健康數據分析</span></div>
+        <div class="analysis-grid">
+          <div class="analysis-card" id="card_bmi">
+            <div class="analysis-title">BMI 指數</div>
+            <div class="analysis-value" id="ha_bmi">--</div>
+            <div class="analysis-desc" id="ha_bmi_desc">--</div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-title" data-i18n="bmr_label">基礎代謝 (BMR)</div>
+            <div class="analysis-value"><span id="ha_bmr">--</span> <small data-i18n="kcal_unit">大卡</small></div>
+          </div>
+          <div class="analysis-card">
+            <div class="analysis-title" data-i18n="tdee_label">每日總消耗 (TDEE)</div>
+            <div class="analysis-value"><span id="ha_tdee">--</span> <small data-i18n="kcal_unit">大卡</small></div>
+          </div>
+        </div>
+        <div class="analysis-suggestion" id="ha_suggestion">
+           <!-- 即時建議文字 -->
+        </div>
       </div>
 
       <!-- Diet Habits -->
@@ -542,12 +575,10 @@
   <h2 data-i18n="ref_title">參考資料</h2>
   <p data-i18n="ref_desc">點擊下方連結下載我們的最新宣傳海報與價目表</p>
   
-  <!-- 新增：海報縮圖預覽，增加視覺豐富度 -->
   <div style="margin: 20px auto 30px; max-width: 260px; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.15); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
     <img src="FitZone_poster.jpg" alt="FitZone 宣傳海報" style="width: 100%; display: block;" onerror="this.style.display='none';">
   </div>
 
-  <!-- 下載按鈕直接指向該圖片 -->
   <a href="FitZone_poster.jpg" onclick="forceDownload(event, this.href, 'FitZone_宣傳海報.jpg')" class="download-link">
     ⬇️ <span data-i18n="ref_link">下載宣傳海報</span>
   </a>
@@ -559,7 +590,7 @@
   <p style="text-align:center; padding: 20px; font-size: 0.9rem; color: #888;" data-i18n="footer_text">© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護</p>
 </footer>
 
-<!-- ADMIN MODAL (保持不變) -->
+<!-- ADMIN MODAL -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal">
     <button class="modal-close" onclick="closeAdmin()">✕</button>
@@ -604,7 +635,7 @@
 <!-- ===================== SCRIPTS ===================== -->
 <script>
   // ======================================================
-  // i18n TRANSLATIONS (加入 BMI 翻譯)
+  // i18n TRANSLATIONS
   // ======================================================
   const i18n = {
     zh: {
@@ -629,7 +660,12 @@
       qr_title:'📱 掃描 QR Code 進入報名', qr_desc:'將此二維碼分享給參加者，他們可直接掃描進入本頁面填寫資料', footer_text:'© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護', privacy_note:'🔒 您的個人資料將被嚴格保密，僅供健身計劃使用',
       placeholder_name:'請輸入您的姓名', placeholder_age:'歲', placeholder_phone:'09xx-xxx-xxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'其他備注或特殊需求（選填）...', empty_data:'📭 尚無報名資料',
       ref_title:'參考資料', ref_desc:'點擊下方連結下載我們的最新宣傳海報與價目表', ref_link:'參考資料', chart_gender:'性別分佈', chart_age:'年齡層次', chart_goals:'熱門健身目標', chart_diet:'飲食習慣分佈',
-      bmi_underweight:'過輕 🍃', bmi_normal:'正常 ✅', bmi_overweight:'過重 ⚠️', bmi_obese:'肥胖 🚨'
+      bmi_underweight:'過輕 🍃', bmi_normal:'正常 ✅', bmi_overweight:'過重 ⚠️', bmi_obese:'肥胖 🚨',
+      section_health_analysis:'專屬健康數據分析', bmr_label:'基礎代謝 (BMR)', tdee_label:'每日總消耗 (TDEE)', kcal_unit:'大卡',
+      ha_fill_exercise:'💡 請繼續填寫「運動習慣」與「健身目標」以獲取專屬熱量攝取建議。',
+      ha_suggest_maintain:'💡 根據您的狀態，建議每日攝取約 <strong>{kcal} 大卡</strong> 以維持目前體重。',
+      ha_suggest_loss:'💡 為了達到減重目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (產生熱量缺口)。',
+      ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。'
     },
     en: {
       nav_admin:'Admin Panel', hero_title:'Your Personalized <span style="color:var(--red)">Fitness Plan</span>', hero_subtitle:'Fill in your personal details and dietary habits. We will craft the perfect fitness and nutrition plan tailored just for you.',
@@ -653,7 +689,12 @@
       qr_title:'📱 Scan QR Code to Register', qr_desc:'Share this QR Code with participants so they can scan and register.', footer_text:'© 2026 FitZone Fitness System', privacy_note:'🔒 Your personal data is strictly protected',
       placeholder_name:'Enter full name', placeholder_age:'years', placeholder_phone:'+1-xxx-xxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'e.g. 170', placeholder_weight:'e.g. 65', placeholder_notes:'Notes...', empty_data:'📭 No data yet',
       ref_title:'Reference Material', ref_desc:'Click below to download our latest poster', ref_link:'Reference Material', chart_gender:'Gender Distribution', chart_age:'Age Groups', chart_goals:'Popular Goals', chart_diet:'Dietary Habits',
-      bmi_underweight:'Underweight 🍃', bmi_normal:'Normal ✅', bmi_overweight:'Overweight ⚠️', bmi_obese:'Obese 🚨'
+      bmi_underweight:'Underweight 🍃', bmi_normal:'Normal ✅', bmi_overweight:'Overweight ⚠️', bmi_obese:'Obese 🚨',
+      section_health_analysis:'Health Analysis', bmr_label:'BMR', tdee_label:'TDEE', kcal_unit:'kcal',
+      ha_fill_exercise:'💡 Fill in exercise frequency and goals for personalized calorie recommendations.',
+      ha_suggest_maintain:'💡 To maintain your weight, consume approx. <strong>{kcal} kcal</strong> daily.',
+      ha_suggest_loss:'💡 For weight loss, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric deficit).',
+      ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).'
     },
     ja: {
       nav_admin:'管理パネル', hero_title:'あなた専用の<span style="color:var(--red)">フィットネスプラン</span>', hero_subtitle:'個人情報と食習慣をご入力ください。最適なフィットネス・栄養プランを作成します。',
@@ -677,7 +718,12 @@
       qr_title:'📱 QRコードをスキャンして登録', qr_desc:'このQRコードを参加者に共有してください', footer_text:'© 2026 FitZone フィットネスシステム', privacy_note:'🔒 個人情報は厳重に保護されます',
       placeholder_name:'氏名を入力', placeholder_age:'歳', placeholder_phone:'090-xxxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'備考...', empty_data:'📭 まだ登録データがありません',
       ref_title:'参考資料', ref_desc:'下のリンクをクリックしてポスターをダウンロード', ref_link:'参考資料', chart_gender:'性別分布', chart_age:'年齢層', chart_goals:'人気の目標', chart_diet:'食習慣の分布',
-      bmi_underweight:'低体重 🍃', bmi_normal:'普通体重 ✅', bmi_overweight:'肥満(1度) ⚠️', bmi_obese:'肥満(2度以上) 🚨'
+      bmi_underweight:'低体重 🍃', bmi_normal:'普通体重 ✅', bmi_overweight:'肥満(1度) ⚠️', bmi_obese:'肥満(2度以上) 🚨',
+      section_health_analysis:'健康データ分析', bmr_label:'基礎代謝量 (BMR)', tdee_label:'総消費カロリー (TDEE)', kcal_unit:'kcal',
+      ha_fill_exercise:'💡 運動頻度と目標を入力すると、おすすめの摂取カロリーが表示されます。',
+      ha_suggest_maintain:'💡 現在の体重を維持するため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします。',
+      ha_suggest_loss:'💡 減量のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリー不足を作る）。',
+      ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。'
     }
   };
 
@@ -691,7 +737,7 @@
     ['zh','en','ja'].forEach(l => { document.getElementById('btn-'+l).classList.toggle('active', l === lang); });
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
     applyTranslations();
-    calcBMI(); // 重新計算以套用新語系的 BMI 文字
+    updateHealthAnalysis(); // 重新計算以套用新語系文字
     if(document.getElementById('adminDash').style.display === 'block') loadDashboard();
   }
 
@@ -738,41 +784,92 @@
   }
 
   // ======================================================
-  // 即時 BMI 計算機 (Interactive BMI)
+  // 綜合健康數據分析 (BMI, BMR, TDEE)
   // ======================================================
-  function calcBMI() {
+  function updateHealthAnalysis() {
+    const ageInput = document.getElementById('f_age').value;
+    const gender = document.getElementById('f_gender').value;
     const hInput = document.getElementById('f_height').value;
     const wInput = document.getElementById('f_weight').value;
-    const badge = document.getElementById('bmiBadge');
+    const exercise = document.getElementById('f_exercise').value;
+    const panel = document.getElementById('healthAnalysisPanel');
     
-    if (hInput && wInput && hInput > 0 && wInput > 0) {
+    // 需要身高體重來計算最基礎的 BMI
+    if (hInput > 0 && wInput > 0) {
+      panel.style.display = 'block';
       const h = parseFloat(hInput) / 100;
       const w = parseFloat(wInput);
       const bmi = (w / (h * h)).toFixed(1);
       
-      let textKey = '';
-      let color = '';
-      
-      if(bmi < 18.5) { textKey = 'bmi_underweight'; color = 'var(--info)'; }
-      else if(bmi < 24) { textKey = 'bmi_normal'; color = 'var(--success)'; }
-      else if(bmi < 27) { textKey = 'bmi_overweight'; color = 'var(--warning)'; }
-      else { textKey = 'bmi_obese'; color = 'var(--danger)'; }
+      let bmiKey = '', color = '';
+      if(bmi < 18.5) { bmiKey = 'bmi_underweight'; color = 'var(--info)'; }
+      else if(bmi < 24) { bmiKey = 'bmi_normal'; color = 'var(--success)'; }
+      else if(bmi < 27) { bmiKey = 'bmi_overweight'; color = 'var(--warning)'; }
+      else { bmiKey = 'bmi_obese'; color = 'var(--danger)'; }
 
-      badge.innerHTML = `<span>BMI: <strong>${bmi}</strong></span> <span>|</span> <span>${t(textKey)}</span>`;
-      badge.style.backgroundColor = color + '20'; // 透明度背景
-      badge.style.color = color;
-      badge.style.border = `1px solid ${color}`;
-      badge.classList.add('show');
+      document.getElementById('ha_bmi').innerText = bmi;
+      const descEl = document.getElementById('ha_bmi_desc');
+      descEl.innerText = t(bmiKey);
+      descEl.style.backgroundColor = color + '20';
+      descEl.style.color = color;
+      document.getElementById('card_bmi').style.borderColor = color + '50';
+
+      // 若進一步填寫了年齡與性別，則計算 BMR (Mifflin-St Jeor Equation)
+      if (ageInput > 0 && gender) {
+        const age = parseFloat(ageInput);
+        let bmr = 0;
+        if(gender === 'male') {
+          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) + 5;
+        } else if(gender === 'female') {
+          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 161;
+        } else {
+          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 78; // 其他性別取平均值
+        }
+        document.getElementById('ha_bmr').innerText = Math.round(bmr);
+
+        // 若填寫了運動習慣，則計算 TDEE 並給予建議
+        if(exercise) {
+          const multipliers = { 'exercise_none': 1.2, 'exercise_occasional': 1.375, 'exercise_regular': 1.55, 'exercise_intense': 1.725 };
+          const tdee = bmr * (multipliers[exercise] || 1.2);
+          document.getElementById('ha_tdee').innerText = Math.round(tdee);
+          
+          const goals = [...document.querySelectorAll('#goals input:checked')].map(i => i.value);
+          let suggestText = t('ha_suggest_maintain').replace('{kcal}', Math.round(tdee));
+          
+          if(goals.includes('goal_weight_loss')) {
+            suggestText = t('ha_suggest_loss').replace('{kcal}', Math.round(tdee - 500));
+          } else if(goals.includes('goal_muscle_gain')) {
+            suggestText = t('ha_suggest_gain').replace('{kcal}', Math.round(tdee + 300));
+          }
+          document.getElementById('ha_suggestion').innerHTML = suggestText;
+        } else {
+          document.getElementById('ha_tdee').innerText = '--';
+          document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
+        }
+      } else {
+        document.getElementById('ha_bmr').innerText = '--';
+        document.getElementById('ha_tdee').innerText = '--';
+        document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
+      }
     } else {
-      badge.classList.remove('show');
+      panel.style.display = 'none';
     }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     initObserver();
     initProgressBar();
-    document.getElementById('f_height').addEventListener('input', calcBMI);
-    document.getElementById('f_weight').addEventListener('input', calcBMI);
+    
+    // 綁定所有會影響健康數據的輸入欄位
+    const triggerInputs = ['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'];
+    triggerInputs.forEach(id => {
+      document.getElementById(id).addEventListener('input', updateHealthAnalysis);
+      document.getElementById(id).addEventListener('change', updateHealthAnalysis);
+    });
+    
+    document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', updateHealthAnalysis);
+    });
   });
 
   // ======================================================
@@ -866,7 +963,7 @@
   }
 
   // ======================================================
-  // ADMIN MODAL & DASHBOARD (邏輯保持不變)
+  // ADMIN MODAL & DASHBOARD
   // ======================================================
   function openAdmin() { document.getElementById('adminModal').classList.add('active'); setTimeout(() => document.getElementById('pwInput').focus(), 100); }
   function closeAdmin() { document.getElementById('adminModal').classList.remove('active'); document.getElementById('adminLogin').style.display = 'block'; document.getElementById('adminDash').style.display = 'none'; document.getElementById('pwInput').value = ''; document.getElementById('pwErr').textContent = ''; }
