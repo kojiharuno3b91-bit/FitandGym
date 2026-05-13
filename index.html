@@ -170,7 +170,7 @@
     .checkbox-item:hover { transform: translateY(-2px); background: #eef1f6; }
     .checkbox-item:has(input:checked) { border-color: var(--red); background: #fff0f3; transform: scale(1.03); font-weight: bold; color: var(--red); }
 
-    /* ===== 健康分析面板 (新增) ===== */
+    /* ===== 健康分析面板 ===== */
     .health-analysis-panel {
       background: linear-gradient(135deg, #f8f9fa, #eef1f6);
       border-radius: 16px; padding: 22px; margin-top: 10px; margin-bottom: 24px;
@@ -294,7 +294,7 @@
     th { background: var(--dark); color: white; padding: 12px 10px; text-align: left; font-size: 0.8rem; }
     th:first-child { border-radius: 8px 0 0 0; }
     th:last-child { border-radius: 0 8px 0 0; }
-    td { padding: 11px 10px; border-bottom: 1px solid #eef1f6; vertical-align: top; }
+    td { padding: 11px 10px; border-bottom: 1px solid #eef1f6; vertical-align: middle; }
     tr:hover td { background: #fafbfd; }
     .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; margin: 2px; }
     .tag-goal { background: #e8f4fd; color: #2980b9; }
@@ -303,6 +303,19 @@
     .export-btn { background: #27ae60; color: white; border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: background 0.2s; }
     .export-btn:hover { background: #219a52; }
     .empty-state { text-align: center; padding: 48px; color: #bbb; font-size: 1rem; }
+    
+    /* 智能分析按鈕 */
+    .analyze-btn {
+      background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 8px;
+      cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; white-space: nowrap;
+    }
+    .analyze-btn:hover { background: #2980b9; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); }
+
+    /* 智能分析彈窗專屬樣式 */
+    .rec-box { background: #f8f9fa; border-left: 4px solid var(--red); padding: 16px; margin-bottom: 16px; border-radius: 0 8px 8px 0; }
+    .rec-box h4 { color: var(--dark); margin-bottom: 8px; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; }
+    .rec-box ul { padding-left: 20px; color: #555; font-size: 0.95rem; line-height: 1.6; }
+    .rec-box ul li { margin-bottom: 4px; }
 
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
@@ -408,7 +421,6 @@
     </div>
 
     <form id="regForm" onsubmit="submitForm(event)">
-
       <!-- Basic Info -->
       <div class="form-section-head">📋 <span data-i18n="section_basic">基本資料</span></div>
       <div class="form-row">
@@ -570,21 +582,6 @@
   </div>
 </div>
 
-<!-- REFERENCE SECTION -->
-<div class="reference-section reveal">
-  <h2 data-i18n="ref_title">參考資料</h2>
-  <p data-i18n="ref_desc">點擊下方連結下載我們的最新宣傳海報與價目表</p>
-  
-  <div style="margin: 20px auto 30px; max-width: 260px; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.15); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-    <img src="FitZone_poster.jpg" alt="FitZone 宣傳海報" style="width: 100%; display: block;" onerror="this.style.display='none';">
-  </div>
-
-  <a href="FitZone_poster.jpg" onclick="forceDownload(event, this.href, 'FitZone_宣傳海報.jpg')" class="download-link">
-    ⬇️ <span data-i18n="ref_link">下載宣傳海報</span>
-  </a>
-</div>
-
-
 <!-- FOOTER -->
 <footer>
   <p style="text-align:center; padding: 20px; font-size: 0.9rem; color: #888;" data-i18n="footer_text">© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護</p>
@@ -622,12 +619,37 @@
               <th data-i18n="th_index">#</th><th data-i18n="th_name">姓名</th><th data-i18n="th_gender">性別</th>
               <th data-i18n="th_age">年齡</th><th data-i18n="th_phone">電話</th><th data-i18n="th_height_weight">身高/體重</th>
               <th data-i18n="th_goals">目標</th><th data-i18n="th_diet_type">飲食</th><th data-i18n="th_allergies">過敏</th>
-              <th data-i18n="th_notes">備注</th><th data-i18n="th_registered_at">報名時間</th>
+              <th data-i18n="th_notes">備注</th><th data-i18n="th_action">操作</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 智能分析建議彈窗 (Recommendation Modal) -->
+<div class="modal-overlay" id="recModal" style="z-index: 1000;">
+  <div class="modal" style="max-width: 600px; padding: 30px;">
+    <button class="modal-close" onclick="closeRecModal()">✕</button>
+    <h2 style="margin-bottom: 20px; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px;">
+      💡 <span id="recUserName"></span> <span data-i18n="modal_rec_title">的專屬健康與產品建議</span>
+    </h2>
+    
+    <div class="rec-box">
+      <h4 data-i18n="rec_workout">🏋️ 推薦健身方式</h4>
+      <div id="recWorkout"></div>
+    </div>
+    
+    <div class="rec-box" style="border-left-color: var(--success);">
+      <h4 data-i18n="rec_products">💊 推薦健康產品</h4>
+      <div id="recProducts"></div>
+    </div>
+    
+    <div class="rec-box" style="border-left-color: var(--warning);">
+      <h4 data-i18n="rec_diet">🍽️ 飲食調整建議</h4>
+      <div id="recDiet"></div>
     </div>
   </div>
 </div>
@@ -659,13 +681,14 @@
       th_index:'#', th_name:'姓名', th_gender:'性別', th_age:'年齡', th_phone:'電話', th_height_weight:'身高/體重', th_goals:'目標', th_diet_type:'飲食', th_allergies:'過敏', th_notes:'備注', th_registered_at:'報名時間',
       qr_title:'📱 掃描 QR Code 進入報名', qr_desc:'將此二維碼分享給參加者，他們可直接掃描進入本頁面填寫資料', footer_text:'© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護', privacy_note:'🔒 您的個人資料將被嚴格保密，僅供健身計劃使用',
       placeholder_name:'請輸入您的姓名', placeholder_age:'歲', placeholder_phone:'09xx-xxx-xxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'其他備注或特殊需求（選填）...', empty_data:'📭 尚無報名資料',
-      ref_title:'參考資料', ref_desc:'點擊下方連結下載我們的最新宣傳海報與價目表', ref_link:'參考資料', chart_gender:'性別分佈', chart_age:'年齡層次', chart_goals:'熱門健身目標', chart_diet:'飲食習慣分佈',
+      chart_gender:'性別分佈', chart_age:'年齡層次', chart_goals:'熱門健身目標', chart_diet:'飲食習慣分佈',
       bmi_underweight:'過輕 🍃', bmi_normal:'正常 ✅', bmi_overweight:'過重 ⚠️', bmi_obese:'肥胖 🚨',
       section_health_analysis:'專屬健康數據分析', bmr_label:'基礎代謝 (BMR)', tdee_label:'每日總消耗 (TDEE)', kcal_unit:'大卡',
       ha_fill_exercise:'💡 請繼續填寫「運動習慣」與「健身目標」以獲取專屬熱量攝取建議。',
       ha_suggest_maintain:'💡 根據您的狀態，建議每日攝取約 <strong>{kcal} 大卡</strong> 以維持目前體重。',
       ha_suggest_loss:'💡 為了達到減重目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (產生熱量缺口)。',
-      ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。'
+      ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。',
+      th_action: '操作', btn_analyze: '🔍 智能分析', modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議'
     },
     en: {
       nav_admin:'Admin Panel', hero_title:'Your Personalized <span style="color:var(--red)">Fitness Plan</span>', hero_subtitle:'Fill in your personal details and dietary habits. We will craft the perfect fitness and nutrition plan tailored just for you.',
@@ -688,13 +711,14 @@
       th_index:'#', th_name:'Name', th_gender:'Gender', th_age:'Age', th_phone:'Phone', th_height_weight:'Height/Weight', th_goals:'Goals', th_diet_type:'Diet', th_allergies:'Allergies', th_notes:'Notes', th_registered_at:'Registered At',
       qr_title:'📱 Scan QR Code to Register', qr_desc:'Share this QR Code with participants so they can scan and register.', footer_text:'© 2026 FitZone Fitness System', privacy_note:'🔒 Your personal data is strictly protected',
       placeholder_name:'Enter full name', placeholder_age:'years', placeholder_phone:'+1-xxx-xxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'e.g. 170', placeholder_weight:'e.g. 65', placeholder_notes:'Notes...', empty_data:'📭 No data yet',
-      ref_title:'Reference Material', ref_desc:'Click below to download our latest poster', ref_link:'Reference Material', chart_gender:'Gender Distribution', chart_age:'Age Groups', chart_goals:'Popular Goals', chart_diet:'Dietary Habits',
+      chart_gender:'Gender Distribution', chart_age:'Age Groups', chart_goals:'Popular Goals', chart_diet:'Dietary Habits',
       bmi_underweight:'Underweight 🍃', bmi_normal:'Normal ✅', bmi_overweight:'Overweight ⚠️', bmi_obese:'Obese 🚨',
       section_health_analysis:'Health Analysis', bmr_label:'BMR', tdee_label:'TDEE', kcal_unit:'kcal',
       ha_fill_exercise:'💡 Fill in exercise frequency and goals for personalized calorie recommendations.',
       ha_suggest_maintain:'💡 To maintain your weight, consume approx. <strong>{kcal} kcal</strong> daily.',
       ha_suggest_loss:'💡 For weight loss, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric deficit).',
-      ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).'
+      ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).',
+      th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions'
     },
     ja: {
       nav_admin:'管理パネル', hero_title:'あなた専用の<span style="color:var(--red)">フィットネスプラン</span>', hero_subtitle:'個人情報と食習慣をご入力ください。最適なフィットネス・栄養プランを作成します。',
@@ -717,13 +741,14 @@
       th_index:'#', th_name:'氏名', th_gender:'性別', th_age:'年齢', th_phone:'電話番号', th_height_weight:'身長/体重', th_goals:'目標', th_diet_type:'食事', th_allergies:'アレルギー', th_notes:'備考', th_registered_at:'登録日時',
       qr_title:'📱 QRコードをスキャンして登録', qr_desc:'このQRコードを参加者に共有してください', footer_text:'© 2026 FitZone フィットネスシステム', privacy_note:'🔒 個人情報は厳重に保護されます',
       placeholder_name:'氏名を入力', placeholder_age:'歳', placeholder_phone:'090-xxxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'備考...', empty_data:'📭 まだ登録データがありません',
-      ref_title:'参考資料', ref_desc:'下のリンクをクリックしてポスターをダウンロード', ref_link:'参考資料', chart_gender:'性別分布', chart_age:'年齢層', chart_goals:'人気の目標', chart_diet:'食習慣の分布',
+      chart_gender:'性別分布', chart_age:'年齢層', chart_goals:'人気の目標', chart_diet:'食習慣の分布',
       bmi_underweight:'低体重 🍃', bmi_normal:'普通体重 ✅', bmi_overweight:'肥満(1度) ⚠️', bmi_obese:'肥満(2度以上) 🚨',
       section_health_analysis:'健康データ分析', bmr_label:'基礎代謝量 (BMR)', tdee_label:'総消費カロリー (TDEE)', kcal_unit:'kcal',
       ha_fill_exercise:'💡 運動頻度と目標を入力すると、おすすめの摂取カロリーが表示されます。',
       ha_suggest_maintain:'💡 現在の体重を維持するため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします。',
       ha_suggest_loss:'💡 減量のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリー不足を作る）。',
-      ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。'
+      ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。',
+      th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案'
     }
   };
 
@@ -737,7 +762,7 @@
     ['zh','en','ja'].forEach(l => { document.getElementById('btn-'+l).classList.toggle('active', l === lang); });
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
     applyTranslations();
-    updateHealthAnalysis(); // 重新計算以套用新語系文字
+    updateHealthAnalysis();
     if(document.getElementById('adminDash').style.display === 'block') loadDashboard();
   }
 
@@ -794,7 +819,6 @@
     const exercise = document.getElementById('f_exercise').value;
     const panel = document.getElementById('healthAnalysisPanel');
     
-    // 需要身高體重來計算最基礎的 BMI
     if (hInput > 0 && wInput > 0) {
       panel.style.display = 'block';
       const h = parseFloat(hInput) / 100;
@@ -814,20 +838,15 @@
       descEl.style.color = color;
       document.getElementById('card_bmi').style.borderColor = color + '50';
 
-      // 若進一步填寫了年齡與性別，則計算 BMR (Mifflin-St Jeor Equation)
       if (ageInput > 0 && gender) {
         const age = parseFloat(ageInput);
         let bmr = 0;
-        if(gender === 'male') {
-          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) + 5;
-        } else if(gender === 'female') {
-          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 161;
-        } else {
-          bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 78; // 其他性別取平均值
-        }
+        if(gender === 'male') { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) + 5; } 
+        else if(gender === 'female') { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 161; } 
+        else { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 78; }
+        
         document.getElementById('ha_bmr').innerText = Math.round(bmr);
 
-        // 若填寫了運動習慣，則計算 TDEE 並給予建議
         if(exercise) {
           const multipliers = { 'exercise_none': 1.2, 'exercise_occasional': 1.375, 'exercise_regular': 1.55, 'exercise_intense': 1.725 };
           const tdee = bmr * (multipliers[exercise] || 1.2);
@@ -836,11 +855,9 @@
           const goals = [...document.querySelectorAll('#goals input:checked')].map(i => i.value);
           let suggestText = t('ha_suggest_maintain').replace('{kcal}', Math.round(tdee));
           
-          if(goals.includes('goal_weight_loss')) {
-            suggestText = t('ha_suggest_loss').replace('{kcal}', Math.round(tdee - 500));
-          } else if(goals.includes('goal_muscle_gain')) {
-            suggestText = t('ha_suggest_gain').replace('{kcal}', Math.round(tdee + 300));
-          }
+          if(goals.includes('goal_weight_loss')) { suggestText = t('ha_suggest_loss').replace('{kcal}', Math.round(tdee - 500)); } 
+          else if(goals.includes('goal_muscle_gain')) { suggestText = t('ha_suggest_gain').replace('{kcal}', Math.round(tdee + 300)); }
+          
           document.getElementById('ha_suggestion').innerHTML = suggestText;
         } else {
           document.getElementById('ha_tdee').innerText = '--';
@@ -851,16 +868,13 @@
         document.getElementById('ha_tdee').innerText = '--';
         document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
       }
-    } else {
-      panel.style.display = 'none';
-    }
+    } else { panel.style.display = 'none'; }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
     initObserver();
     initProgressBar();
     
-    // 綁定所有會影響健康數據的輸入欄位
     const triggerInputs = ['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'];
     triggerInputs.forEach(id => {
       document.getElementById(id).addEventListener('input', updateHealthAnalysis);
@@ -913,8 +927,6 @@
         document.getElementById('regForm').style.display = 'none';
         document.getElementById('successMsg').style.display = 'block';
         window.scrollTo({ top: document.querySelector('.register-section').offsetTop - 80, behavior: 'smooth' });
-        
-        // 🎉 觸發 Confetti 撒花特效
         triggerConfetti();
       }, 600);
     } catch (error) {
@@ -934,7 +946,7 @@
   }
 
   // ======================================================
-  // QR CODE & OTHERS
+  // QR CODE
   // ======================================================
   window.addEventListener('load', () => {
     const url = window.location.href.split('#')[0];
@@ -950,16 +962,6 @@
   }
   function copyURL() {
     navigator.clipboard.writeText(window.location.href.split('#')[0]).then(() => alert('✅ ' + (currentLang === 'ja' ? 'URLをコピーしました！' : currentLang === 'en' ? 'URL copied!' : '網址已複製！')));
-  }
-  function forceDownload(event, url, filename) {
-    event.preventDefault();
-    fetch(url).then(r => r.blob()).then(blob => {
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = blobUrl; a.download = filename;
-      document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(blobUrl);
-    }).catch(() => {
-      const a = document.createElement('a'); a.href = url; a.download = filename; a.target = '_blank'; a.click();
-    });
   }
 
   // ======================================================
@@ -1008,7 +1010,7 @@
     chartInstances.push(new Chart(ctxDiet, { type: 'pie', data: { labels: Object.keys(dietData).map(k => t(k)), datasets: [{ data: Object.values(dietData), backgroundColor: colors.slice(0, Object.keys(dietData).length), borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } }));
   }
 
-  async function loadDashboard() {
+  function loadDashboard() {
     const tbody = document.getElementById('tableBody');
     let data = JSON.parse(localStorage.getItem('fitzone_participants') || '[]');
     data.sort((a, b) => b.id - a.id); cachedData = data;
@@ -1027,7 +1029,7 @@
     `;
 
     renderCharts(data);
-    ['th_index','th_name','th_gender','th_age','th_phone','th_height_weight','th_goals','th_diet_type','th_allergies','th_notes','th_registered_at'].forEach((key,i) => {
+    ['th_index','th_name','th_gender','th_age','th_phone','th_height_weight','th_goals','th_diet_type','th_allergies','th_notes','th_action'].forEach((key,i) => {
       const ths = document.querySelectorAll('#dataTable thead th'); if (ths[i]) ths[i].textContent = t(key);
     });
 
@@ -1040,7 +1042,8 @@
         <td>${(r.goals || []).map(g=>`<span class="tag tag-goal">${t(g)||g}</span>`).join('')}</td>
         <td><span class="tag tag-diet">${t(r.diet)}</span><br><small>${t(r.meals)||''}</small></td>
         <td>${(r.allergies || []).map(a=>`<span class="tag tag-allergy">${t(a)||a}</span>`).join('')}</td>
-        <td style="max-width:160px;font-size:0.8rem">${r.note||'-'}</td><td style="font-size:0.78rem;color:#999;white-space:nowrap">${r.time}</td>
+        <td style="max-width:160px;font-size:0.8rem">${r.note||'-'}</td>
+        <td><button class="analyze-btn" onclick="openRecModal(${r.id})">${t('btn_analyze')}</button></td>
       </tr>
     `).join('');
   }
@@ -1052,6 +1055,90 @@
     const csv = [headers,...rows].map(row => row.map(c=>`"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `FitZone_${new Date().toLocaleDateString()}.csv`; link.click();
+  }
+
+  // ======================================================
+  // 智能分析與產品推薦邏輯 (Recommendation Logic)
+  // ======================================================
+  function openRecModal(userId) {
+    const user = cachedData.find(u => u.id === userId);
+    if (!user) return;
+
+    let workouts = [];
+    let products = [];
+    let dietTips = [];
+
+    // 計算 BMI
+    const h = parseFloat(user.height) / 100;
+    const w = parseFloat(user.weight);
+    const bmi = w / (h * h);
+
+    // 1. 健身方式推薦邏輯
+    if (bmi > 27) {
+      workouts.push('⚠️ <b>BMI 偏高</b>：建議初期以「低衝擊有氧」(如游泳、室內腳踏車、橢圓機) 為主，減少膝關節負擔。');
+    }
+    if (user.goals.includes('goal_weight_loss')) {
+      workouts.push('🏃 <b>減脂燃脂</b>：高強度間歇訓練 (HIIT)、每週 3-4 次 40 分鐘有氧運動。');
+    }
+    if (user.goals.includes('goal_muscle_gain')) {
+      workouts.push('💪 <b>肌力成長</b>：每週 3-4 次重量訓練，專注於複合性動作 (深蹲、硬舉、臥推)。');
+    }
+    if (user.goals.includes('goal_posture') || user.goals.includes('goal_stress')) {
+      workouts.push('🧘 <b>體態與放鬆</b>：瑜珈、皮拉提斯、核心肌群強化與伸展放鬆。');
+    }
+    if (workouts.length === 0) {
+      workouts.push('🚶 <b>基礎保養</b>：每週 3 次、每次 30 分鐘的中等強度運動 (快走、慢跑)。');
+    }
+
+    // 2. 產品/補劑推薦邏輯
+    if (user.goals.includes('goal_muscle_gain') || user.goals.includes('goal_fitness')) {
+      // 根據飲食與過敏過濾蛋白粉種類
+      if (user.diet === 'diet_vegan' || user.diet === 'diet_vegetarian') {
+        products.push('🌱 <b>植物性蛋白粉</b> (大豆/豌豆/玄米蛋白) - 適合素食者增肌。');
+      } else if (user.allergies.includes('allergy_lactose')) {
+        products.push('🥛 <b>分離乳清蛋白 (Isolate)</b> - 去除乳糖，避免腸胃不適。');
+      } else {
+        products.push('🥛 <b>濃縮乳清蛋白 (Whey)</b> - 提供高性價比的優質蛋白質。');
+      }
+      products.push('⚡ <b>一水肌酸 (Creatine)</b> - 提升肌肉爆發力與高強度訓練表現。');
+    }
+    if (user.goals.includes('goal_weight_loss')) {
+      products.push('🍵 <b>無糖綠茶萃取物 / 左旋肉鹼</b> - 輔助提升基礎代謝率與脂肪酸運輸。');
+      if(user.diet === 'diet_keto' || user.diet === 'diet_low_carb') {
+        products.push('🥥 <b>MCT 油 (中鏈脂肪酸)</b> - 快速提供能量，適合低碳/生酮飲食。');
+      }
+    }
+    if (user.goals.includes('goal_health') || user.goals.includes('goal_stress')) {
+      products.push('🐟 <b>高濃度魚油 (Omega-3)</b> - 幫助抗發炎並保護心血管健康。');
+      products.push('💊 <b>綜合維他命 / B群</b> - 補充日常飲食不足的微量營養素，舒緩疲勞。');
+    }
+    if (user.allergies.includes('allergy_none') === false) {
+      products.push('⚠️ <i>系統已避開您的過敏原，請在購買任何產品前再次確認成分標示。</i>');
+    }
+
+    // 3. 飲食調整建議
+    if (user.diet === 'diet_keto') {
+      dietTips.push('🥑 <b>生酮飲食</b>：注意補充電解質 (鈉、鉀、鎂)，多攝取優質油脂 (酪梨、橄欖油、堅果)。');
+    } else if (user.goals.includes('goal_weight_loss')) {
+      dietTips.push('🥗 <b>減重飲食</b>：保持每日熱量赤字 300-500 大卡，增加膳食纖維攝取以提升飽足感。');
+    } else if (user.goals.includes('goal_muscle_gain')) {
+      dietTips.push('🥩 <b>增肌飲食</b>：確保每日蛋白質攝取量達「體重(kg) x 1.6~2.0 克」，並保持輕微的熱量盈餘。');
+    }
+    if (user.meals === 'meals_irregular') {
+      dietTips.push('⏰ <b>進食頻率</b>：建議養成定時定量的進食習慣，避免因過度飢餓導致暴飲暴食。');
+    }
+
+    // 渲染到 Modal
+    document.getElementById('recUserName').innerText = user.name;
+    document.getElementById('recWorkout').innerHTML = '<ul>' + workouts.map(w => `<li>${w}</li>`).join('') + '</ul>';
+    document.getElementById('recProducts').innerHTML = '<ul>' + products.map(p => `<li>${p}</li>`).join('') + '</ul>';
+    document.getElementById('recDiet').innerHTML = '<ul>' + (dietTips.length > 0 ? dietTips.map(d => `<li>${d}</li>`).join('') : '<li>保持目前的飲食習慣，並確保充足的水分攝取。</li>') + '</ul>';
+
+    document.getElementById('recModal').classList.add('active');
+  }
+
+  function closeRecModal() {
+    document.getElementById('recModal').classList.remove('active');
   }
 </script>
 </body>
