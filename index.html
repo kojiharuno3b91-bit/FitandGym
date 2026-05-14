@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FitZone 健身計劃報名系統</title>
 
-<!-- 引入 QR Code 套件 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- 引入 Chart.js 圖表套件 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- 引入 Confetti 撒花特效套件 -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
@@ -380,7 +378,7 @@ nav .logo { font-size: 1.1rem; }
 <nav>
 <div class="logo" onclick="window.scrollTo({top:0, behavior:'smooth'})">💪 Fit<span>Zone</span></div>
 <div class="nav-right">
-<button class="admin-nav-btn" onclick="openAdmin()" data-i18n="nav_admin">管理後台</button>
+<button class="admin-nav-btn" onclick="openAdmin()">管理後台</button>
 </div>
 </nav>
 
@@ -713,6 +711,17 @@ nav .logo { font-size: 1.1rem; }
 
 <!-- ===================== SCRIPTS ===================== -->
 <script>
+     // ==================== Supabase 配置 ====================
+// 【請務必修改成你自己的】
+const SUPABASE_URL = 'https://hexftwgbxclvvvyvlfvl.supabase.co';     // ← 改成你的
+const SUPABASE_ANON_KEY = 'sb_publishable_uog5r7nu1xEL0MbH_91BhA_phI85kMe';   // ← 改成你的
+
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const ADMIN_PW = 'fitadmin2024';   // 可自行修改
+let cachedData = [];
+let chartInstances = [];
+let currentLang = 'zh';
 // ======================================================
 // i18n TRANSLATIONS
 // ======================================================
@@ -822,6 +831,62 @@ let currentLang = 'zh';
 let chartInstances = [];
 
 function t(key) { return i18n[currentLang][key] || key; }
+
+// ==================== 提交表單 ====================
+async function submitForm(e) {
+    e.preventDefault();
+    const getChecked = (sel) => [...document.querySelectorAll(sel + ' input:checked')].map(el => el.value);
+
+    const record = {
+        name: document.getElementById('f_name').value.trim(),
+        gender: document.getElementById('f_gender').value,
+        age: parseInt(document.getElementById('f_age').value) || null,
+        phone: document.getElementById('f_phone').value.trim(),
+        email: document.getElementById('f_email').value.trim(),
+        height: parseFloat(document.getElementById('f_height').value) || null,
+        weight: parseFloat(document.getElementById('f_weight').value) || null,
+        goals: getChecked('#goals'),
+        exercise: document.getElementById('f_exercise').value,
+        diet: document.getElementById('f_diet').value,
+        meals: document.getElementById('f_meals').value,
+        allergies: getChecked('.checkbox-group').filter(v => v.startsWith('allergy_')),
+        supplements: getChecked('.checkbox-group').filter(v => v.startsWith('supp_')),
+        note: document.getElementById('f_note').value.trim()
+    };
+
+    const btn = document.querySelector('.submit-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ 提交中...'; btn.disabled = true;
+
+    const { error } = await supabase.from('participants').insert([record]);
+
+    if (error) {
+        alert('提交失敗：' + error.message);
+    } else {
+        document.getElementById('regForm').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+        triggerConfetti();
+        document.getElementById('regForm').reset();
+    }
+
+    btn.innerHTML = orig; btn.disabled = false;
+}
+
+// ==================== 後台功能 ====================
+async function loadDashboard() {
+    const { data, error } = await supabase.from('participants').select('*').order('created_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    cachedData = data || [];
+    renderStats();
+    renderTable();
+    renderCharts();
+}
+
+function enableRealtime() {
+    supabase.channel('realtime-participants')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, loadDashboard)
+        .subscribe();
+}
 
 function setLang(lang) {
 currentLang = lang;
@@ -1197,6 +1262,62 @@ if (lower.includes('教練') || lower.includes('上課'))
 return "我們擁有專業的教練團隊，提供一對一指導與線上諮詢，確保您的每一個動作都安全且有效！";
 
 return "謝謝您的提問！這部分建議您可以直接填寫報名表，我們的專業教練會為您提供更詳細的一對一諮詢服務喔！✨";
+
+// ==================== 提交表單 ====================
+async function submitForm(e) {
+    e.preventDefault();
+    const getChecked = (sel) => [...document.querySelectorAll(sel + ' input:checked')].map(el => el.value);
+
+    const record = {
+        name: document.getElementById('f_name').value.trim(),
+        gender: document.getElementById('f_gender').value,
+        age: parseInt(document.getElementById('f_age').value) || null,
+        phone: document.getElementById('f_phone').value.trim(),
+        email: document.getElementById('f_email').value.trim(),
+        height: parseFloat(document.getElementById('f_height').value) || null,
+        weight: parseFloat(document.getElementById('f_weight').value) || null,
+        goals: getChecked('#goals'),
+        exercise: document.getElementById('f_exercise').value,
+        diet: document.getElementById('f_diet').value,
+        meals: document.getElementById('f_meals').value,
+        allergies: getChecked('.checkbox-group').filter(v => v.startsWith('allergy_')),
+        supplements: getChecked('.checkbox-group').filter(v => v.startsWith('supp_')),
+        note: document.getElementById('f_note').value.trim()
+    };
+
+    const btn = document.querySelector('.submit-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳ 提交中...'; btn.disabled = true;
+
+    const { error } = await supabase.from('participants').insert([record]);
+
+    if (error) {
+        alert('提交失敗：' + error.message);
+    } else {
+        document.getElementById('regForm').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+        triggerConfetti();
+        document.getElementById('regForm').reset();
+    }
+
+    btn.innerHTML = orig; btn.disabled = false;
+}
+
+// ==================== 後台功能 ====================
+async function loadDashboard() {
+    const { data, error } = await supabase.from('participants').select('*').order('created_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    cachedData = data || [];
+    renderStats();
+    renderTable();
+    renderCharts();
+}
+
+function enableRealtime() {
+    supabase.channel('realtime-participants')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, loadDashboard)
+        .subscribe();
+}
 }
 }
 </script>
