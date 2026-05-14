@@ -132,7 +132,6 @@
       padding: 40px 44px; box-shadow: 0 10px 48px rgba(0,0,0,0.12); position: relative;
     }
     
-    /* 進度條 */
     .progress-container {
       width: 100%; height: 6px; background: #e8ecf0; border-radius: 3px;
       margin-bottom: 30px; overflow: hidden;
@@ -158,7 +157,6 @@
     }
     .form-section-head::after { content: ''; flex: 1; height: 1px; background: #e8ecf0; }
     
-    /* 互動 Checkbox */
     .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
     .checkbox-item {
       display: flex; align-items: center; gap: 8px; background: #f7f9fc; padding: 8px 14px;
@@ -199,7 +197,6 @@
       margin-top: 10px; transition: all 0.3s; letter-spacing: 0.5px; position: relative; overflow: hidden;
     }
     .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(233,69,96,0.4); }
-    .submit-btn:active { transform: translateY(0); }
     .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .form-note { text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 14px; }
 
@@ -311,18 +308,62 @@
     }
     .analyze-btn:hover { background: #2980b9; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); }
 
-    /* 智能分析彈窗專屬樣式 */
     .rec-box { background: #f8f9fa; border-left: 4px solid var(--red); padding: 16px; margin-bottom: 16px; border-radius: 0 8px 8px 0; }
     .rec-box h4 { color: var(--dark); margin-bottom: 8px; font-size: 1.05rem; display: flex; align-items: center; gap: 6px; }
     .rec-box ul { padding-left: 20px; color: #555; font-size: 0.95rem; line-height: 1.6; }
     .rec-box ul li { margin-bottom: 4px; }
 
+    /* ===== AI CHATBOT WIDGET ===== */
+    .ai-chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+    .ai-chat-btn {
+      background: linear-gradient(135deg, var(--red), #ff7b93); color: white; border: none;
+      border-radius: 50%; width: 64px; height: 64px; font-size: 28px; cursor: pointer;
+      box-shadow: 0 6px 20px rgba(233,69,96,0.4); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ai-chat-btn:hover { transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 25px rgba(233,69,96,0.5); }
+    .ai-chat-window {
+      display: none; position: absolute; bottom: 85px; right: 0; width: 360px; height: 520px;
+      background: white; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+      flex-direction: column; overflow: hidden; transform-origin: bottom right;
+      animation: popInChat 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popInChat { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+    .ai-chat-window.active { display: flex; }
+    .ai-chat-header {
+      background: linear-gradient(135deg, var(--dark), var(--mid)); color: white; padding: 18px 20px;
+      display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 1.1rem;
+    }
+    .ai-chat-close { background: transparent; border: none; color: white; cursor: pointer; font-size: 22px; line-height: 1; transition: transform 0.2s;}
+    .ai-chat-close:hover { transform: rotate(90deg); }
+    .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: #f4f7fa; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+    .ai-msg { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word; }
+    .ai-msg.user { background: var(--red); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(233,69,96,0.2); }
+    .ai-msg.bot { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1px solid #eee; }
+    .ai-chat-footer { padding: 14px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
+    .ai-chat-input {
+      flex: 1; padding: 12px 18px; border: 2px solid #e8ecf0; border-radius: 24px;
+      outline: none; font-size: 0.95rem; transition: border-color 0.3s; background: #fafbfc;
+    }
+    .ai-chat-input:focus { border-color: var(--red); background: white; }
+    .ai-chat-send {
+      background: var(--red); color: white; border: none; border-radius: 50%;
+      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s; font-size: 1.2rem;
+    }
+    .ai-chat-send:hover { background: #c73652; transform: scale(1.05); box-shadow: 0 4px 10px rgba(233,69,96,0.3); }
+    .typing-indicator { display: none; padding: 12px 16px; align-self: flex-start; background: white; border-radius: 16px; border-bottom-left-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 10px; }
+    .typing-indicator span { display: inline-block; width: 8px; height: 8px; background: #ccc; border-radius: 50%; margin: 0 3px; animation: bounce 1.4s infinite ease-in-out both; }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
       .form-wrapper { padding: 30px 20px; }
       .hero h1 { font-size: 2.2rem; }
       nav .logo { font-size: 1.1rem; }
       .modal { padding: 28px 18px; }
+      .ai-chat-window { width: calc(100vw - 40px); right: -10px; bottom: 80px; height: 480px; }
     }
   </style>
 </head>
@@ -486,7 +527,7 @@
         </select>
       </div>
 
-      <!-- 健康數據分析面板 (動態顯示) -->
+      <!-- 健康數據分析面板 -->
       <div id="healthAnalysisPanel" class="health-analysis-panel">
         <div class="form-section-head" style="margin-top:0;">📊 <span data-i18n="section_health_analysis">專屬健康數據分析</span></div>
         <div class="analysis-grid">
@@ -504,9 +545,7 @@
             <div class="analysis-value"><span id="ha_tdee">--</span> <small data-i18n="kcal_unit">大卡</small></div>
           </div>
         </div>
-        <div class="analysis-suggestion" id="ha_suggestion">
-           <!-- 即時建議文字 -->
-        </div>
+        <div class="analysis-suggestion" id="ha_suggestion"></div>
       </div>
 
       <!-- Diet Habits -->
@@ -586,16 +625,8 @@
 <div class="reference-section reveal">
   <h2 class="section-title" data-i18n="ref_title">參考資料</h2>
   <p class="section-subtitle" data-i18n="ref_desc">點擊下方按鈕下載我們的最新宣傳海報與價目表</p>
-  
-  <!-- 下載按鈕 -->
-  <button class="download-link" onclick="forceDownloadPoster()" style="border:none;">
-    ⬇️ 下載宣傳海報
-  </button>
-
-  <!-- 海報預覽圖 -->
-  <div style="margin: 20px auto 30px; max-width: 280px; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.15); transition: transform 0.3s;" 
-       onmouseover="this.style.transform='scale(1.05)'" 
-       onmouseout="this.style.transform='scale(1)'">
+  <button class="download-link" onclick="forceDownloadPoster()" style="border:none;">⬇️ 下載宣傳海報</button>
+  <div style="margin: 20px auto 30px; max-width: 280px; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,0.15); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
     <img src="FitZone_poster.jpg" alt="FitZone 宣傳海報" style="width: 100%; display: block;" onerror="this.style.display='none';">
   </div>
 </div>
@@ -647,27 +678,34 @@
   </div>
 </div>
 
-<!-- 智能分析建議彈窗 (Recommendation Modal) -->
+<!-- 智能分析建議彈窗 -->
 <div class="modal-overlay" id="recModal" style="z-index: 1000;">
   <div class="modal" style="max-width: 600px; padding: 30px;">
     <button class="modal-close" onclick="closeRecModal()">✕</button>
     <h2 style="margin-bottom: 20px; color: var(--dark); border-bottom: 2px solid #eee; padding-bottom: 10px;">
       💡 <span id="recUserName"></span> <span data-i18n="modal_rec_title">的專屬健康與產品建議</span>
     </h2>
-    
-    <div class="rec-box">
-      <h4 data-i18n="rec_workout">🏋️ 推薦健身方式</h4>
-      <div id="recWorkout"></div>
+    <div class="rec-box"><h4 data-i18n="rec_workout">🏋️ 推薦健身方式</h4><div id="recWorkout"></div></div>
+    <div class="rec-box" style="border-left-color: var(--success);"><h4 data-i18n="rec_products">💊 推薦健康產品</h4><div id="recProducts"></div></div>
+    <div class="rec-box" style="border-left-color: var(--warning);"><h4 data-i18n="rec_diet">🍽️ 飲食調整建議</h4><div id="recDiet"></div></div>
+  </div>
+</div>
+
+<!-- AI 客服懸浮視窗 -->
+<div class="ai-chat-widget">
+  <button class="ai-chat-btn" onclick="toggleAIChat()" id="aiChatBtn">🤖</button>
+  <div class="ai-chat-window" id="aiChatWindow">
+    <div class="ai-chat-header">
+      <span data-i18n="ai_chat_title">🤖 FitZone 智能客服</span>
+      <button class="ai-chat-close" onclick="toggleAIChat()">✕</button>
     </div>
-    
-    <div class="rec-box" style="border-left-color: var(--success);">
-      <h4 data-i18n="rec_products">💊 推薦健康產品</h4>
-      <div id="recProducts"></div>
+    <div class="ai-chat-body" id="aiChatBody">
+      <div class="ai-msg bot" data-i18n-html="ai_chat_greeting">您好！我是 FitZone 智能客服 🤖<br>請問有什麼我可以幫您的嗎？（您可以問我關於報名、價格、減重或飲食的問題喔）</div>
+      <div class="typing-indicator" id="aiTyping"><span></span><span></span><span></span></div>
     </div>
-    
-    <div class="rec-box" style="border-left-color: var(--warning);">
-      <h4 data-i18n="rec_diet">🍽️ 飲食調整建議</h4>
-      <div id="recDiet"></div>
+    <div class="ai-chat-footer">
+      <input type="text" class="ai-chat-input" id="aiChatInput" data-i18n-placeholder="ai_chat_placeholder" placeholder="輸入您的問題..." onkeypress="if(event.key==='Enter') sendAIMessage()">
+      <button class="ai-chat-send" onclick="sendAIMessage()">➤</button>
     </div>
   </div>
 </div>
@@ -707,8 +745,8 @@
       ha_suggest_loss:'💡 為了達到減重目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (產生熱量缺口)。',
       ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。',
       th_action: '操作', btn_analyze: '🔍 智能分析', modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議',ref_title: '參考資料',
-      ref_desc: '點擊下方連結下載我們的最新宣傳海報與價目表',
-      ref_link: '下載宣傳海報',
+      ref_desc: '點擊下方連結下載我們的最新宣傳海報與價目表', ref_link: '下載宣傳海報',
+      ai_chat_title: '🤖 FitZone 智能客服', ai_chat_greeting: '您好！我是 FitZone 智能客服 🤖<br>請問有什麼我可以幫您的嗎？<br><small style="color:#888">（您可以問我關於報名、價格、減重或飲食的問題喔）</small>', ai_chat_placeholder: '輸入您的問題...'
     },
     en: {
       nav_admin:'Admin Panel', hero_title:'Your Personalized <span style="color:var(--red)">Fitness Plan</span>', hero_subtitle:'Fill in your personal details and dietary habits. We will craft the perfect fitness and nutrition plan tailored just for you.',
@@ -738,9 +776,9 @@
       ha_suggest_maintain:'💡 To maintain your weight, consume approx. <strong>{kcal} kcal</strong> daily.',
       ha_suggest_loss:'💡 For weight loss, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric deficit).',
       ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).',
-      th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions',      ref_title: 'Reference Materials',
-      ref_desc: 'Click the link below to download our latest poster and price list',
-      ref_link: 'Download Poster',
+      th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions', ref_title: 'Reference Materials',
+      ref_desc: 'Click the link below to download our latest poster and price list', ref_link: 'Download Poster',
+      ai_chat_title: '🤖 FitZone AI Support', ai_chat_greeting: 'Hello! I am the FitZone AI Assistant 🤖<br>How can I help you today?<br><small style="color:#888">(Ask about pricing, registration, diets, or weight loss)</small>', ai_chat_placeholder: 'Type your question...'
     },
     ja: {
       nav_admin:'管理パネル', hero_title:'あなた専用の<span style="color:var(--red)">フィットネスプラン</span>', hero_subtitle:'個人情報と食習慣をご入力ください。最適なフィットネス・栄養プランを作成します。',
@@ -770,9 +808,9 @@
       ha_suggest_maintain:'💡 現在の体重を維持するため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします。',
       ha_suggest_loss:'💡 減量のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリー不足を作る）。',
       ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。',
-      th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案',      ref_title: '参考資料',
-      ref_desc: '最新のポスターと料金表をダウンロードするには、下のリンクをクリックしてください',
-      ref_link: 'ポスターをダウンロード',
+      th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案', ref_title: '参考資料',
+      ref_desc: '最新のポスターと料金表をダウンロードするには、下のリンクをクリックしてください', ref_link: 'ポスターをダウンロード',
+      ai_chat_title: '🤖 FitZone AI サポート', ai_chat_greeting: 'こんにちは！FitZone AIアシスタントです 🤖<br>どのようなご用件でしょうか？<br><small style="color:#888">（料金、登録、食事、ダイエットについてご質問ください）</small>', ai_chat_placeholder: '質問を入力してください...'
     }
   };
 
@@ -798,56 +836,32 @@
     document.querySelectorAll('.checkbox-item span[data-i18n]').forEach(span => span.textContent = t(span.getAttribute('data-i18n')));
   }
 
-  // ======================================================
-  // 視差滾動動畫 (Scroll Reveal)
-  // ======================================================
   function initObserver() {
     const reveals = document.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if(entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
+      entries.forEach(entry => { if(entry.isIntersecting) entry.target.classList.add('active'); });
     }, { threshold: 0.12 });
     reveals.forEach(r => observer.observe(r));
   }
 
-  // ======================================================
-  // 表單進度條 (Form Progress)
-  // ======================================================
   function initProgressBar() {
     const requiredInputs = document.querySelectorAll('#regForm input[required], #regForm select[required]');
     const updateProgress = () => {
       let filled = 0;
-      requiredInputs.forEach(input => {
-        if (input.value.trim() !== '') filled++;
-      });
-      const percent = (filled / requiredInputs.length) * 100;
-      document.getElementById('formProgress').style.width = percent + '%';
+      requiredInputs.forEach(input => { if (input.value.trim() !== '') filled++; });
+      document.getElementById('formProgress').style.width = ((filled / requiredInputs.length) * 100) + '%';
     };
-    requiredInputs.forEach(input => {
-      input.addEventListener('input', updateProgress);
-      input.addEventListener('change', updateProgress);
-    });
+    requiredInputs.forEach(input => { input.addEventListener('input', updateProgress); input.addEventListener('change', updateProgress); });
   }
 
-  // ======================================================
-  // 綜合健康數據分析 (BMI, BMR, TDEE)
-  // ======================================================
   function updateHealthAnalysis() {
-    const ageInput = document.getElementById('f_age').value;
-    const gender = document.getElementById('f_gender').value;
-    const hInput = document.getElementById('f_height').value;
-    const wInput = document.getElementById('f_weight').value;
-    const exercise = document.getElementById('f_exercise').value;
-    const panel = document.getElementById('healthAnalysisPanel');
+    const ageInput = document.getElementById('f_age').value, gender = document.getElementById('f_gender').value;
+    const hInput = document.getElementById('f_height').value, wInput = document.getElementById('f_weight').value;
+    const exercise = document.getElementById('f_exercise').value, panel = document.getElementById('healthAnalysisPanel');
     
     if (hInput > 0 && wInput > 0) {
       panel.style.display = 'block';
-      const h = parseFloat(hInput) / 100;
-      const w = parseFloat(wInput);
-      const bmi = (w / (h * h)).toFixed(1);
+      const h = parseFloat(hInput) / 100, w = parseFloat(wInput), bmi = (w / (h * h)).toFixed(1);
       
       let bmiKey = '', color = '';
       if(bmi < 18.5) { bmiKey = 'bmi_underweight'; color = 'var(--info)'; }
@@ -857,17 +871,14 @@
 
       document.getElementById('ha_bmi').innerText = bmi;
       const descEl = document.getElementById('ha_bmi_desc');
-      descEl.innerText = t(bmiKey);
-      descEl.style.backgroundColor = color + '20';
-      descEl.style.color = color;
+      descEl.innerText = t(bmiKey); descEl.style.backgroundColor = color + '20'; descEl.style.color = color;
       document.getElementById('card_bmi').style.borderColor = color + '50';
 
       if (ageInput > 0 && gender) {
-        const age = parseFloat(ageInput);
-        let bmr = 0;
-        if(gender === 'male') { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) + 5; } 
-        else if(gender === 'female') { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 161; } 
-        else { bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 78; }
+        const age = parseFloat(ageInput); let bmr = 0;
+        if(gender === 'male') bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) + 5;
+        else if(gender === 'female') bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 161;
+        else bmr = (10 * w) + (6.25 * (h*100)) - (5 * age) - 78;
         
         document.getElementById('ha_bmr').innerText = Math.round(bmr);
 
@@ -878,48 +889,34 @@
           
           const goals = [...document.querySelectorAll('#goals input:checked')].map(i => i.value);
           let suggestText = t('ha_suggest_maintain').replace('{kcal}', Math.round(tdee));
-          
-          if(goals.includes('goal_weight_loss')) { suggestText = t('ha_suggest_loss').replace('{kcal}', Math.round(tdee - 500)); } 
-          else if(goals.includes('goal_muscle_gain')) { suggestText = t('ha_suggest_gain').replace('{kcal}', Math.round(tdee + 300)); }
+          if(goals.includes('goal_weight_loss')) suggestText = t('ha_suggest_loss').replace('{kcal}', Math.round(tdee - 500));
+          else if(goals.includes('goal_muscle_gain')) suggestText = t('ha_suggest_gain').replace('{kcal}', Math.round(tdee + 300));
           
           document.getElementById('ha_suggestion').innerHTML = suggestText;
         } else {
-          document.getElementById('ha_tdee').innerText = '--';
-          document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
+          document.getElementById('ha_tdee').innerText = '--'; document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
         }
       } else {
-        document.getElementById('ha_bmr').innerText = '--';
-        document.getElementById('ha_tdee').innerText = '--';
-        document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
+        document.getElementById('ha_bmr').innerText = '--'; document.getElementById('ha_tdee').innerText = '--'; document.getElementById('ha_suggestion').innerHTML = t('ha_fill_exercise');
       }
     } else { panel.style.display = 'none'; }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    initObserver();
-    initProgressBar();
-    
-    const triggerInputs = ['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'];
-    triggerInputs.forEach(id => {
+    initObserver(); initProgressBar();
+    ['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'].forEach(id => {
       document.getElementById(id).addEventListener('input', updateHealthAnalysis);
       document.getElementById(id).addEventListener('change', updateHealthAnalysis);
     });
-    
-    document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', updateHealthAnalysis);
-    });
+    document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => cb.addEventListener('change', updateHealthAnalysis));
   });
 
-  // ======================================================
-  // FORM SUBMIT & CONFETTI
-  // ======================================================
   const ADMIN_PW  = 'fitadmin2024';
   let cachedData = [];
 
   async function submitForm(e) {
     e.preventDefault();
-    const getCheckedVals = (selector) => [...document.querySelectorAll(selector + ' input[type="checkbox"]:checked')].map(i => i.value);
-
+    const getCheckedVals = (sel) => [...document.querySelectorAll(sel + ' input[type="checkbox"]:checked')].map(i => i.value);
     const record = {
       id: Date.now(), time: new Date().toLocaleString('zh-Hant', {timeZone: 'Asia/Shanghai'}),
       name: document.getElementById('f_name').value.trim(), gender: document.getElementById('f_gender').value,
@@ -927,8 +924,7 @@
       email: document.getElementById('f_email').value.trim(), height: document.getElementById('f_height').value,
       weight: document.getElementById('f_weight').value, goals: getCheckedVals('#goals'),
       exercise: document.getElementById('f_exercise').value, diet: document.getElementById('f_diet').value,
-      meals: document.getElementById('f_meals').value, allergies: [], supplements: [],
-      note: document.getElementById('f_note').value.trim(),
+      meals: document.getElementById('f_meals').value, allergies: [], supplements: [], note: document.getElementById('f_note').value.trim(),
     };
 
     const allergyVals = ['allergy_gluten','allergy_lactose','allergy_nuts','allergy_seafood','allergy_eggs','allergy_none'];
@@ -938,65 +934,49 @@
       if (suppVals.includes(cb.value)) record.supplements.push(cb.value);
     });
 
-    const submitBtn = document.querySelector('.submit-btn');
-    const originalBtnText = submitBtn.innerHTML;
+    const submitBtn = document.querySelector('.submit-btn'); const originalBtnText = submitBtn.innerHTML;
     submitBtn.innerHTML = '⏳ 處理中...'; submitBtn.disabled = true;
 
     try {
       let participants = JSON.parse(localStorage.getItem('fitzone_participants') || '[]');
-      participants.push(record);
-      localStorage.setItem('fitzone_participants', JSON.stringify(participants));
+      participants.push(record); localStorage.setItem('fitzone_participants', JSON.stringify(participants));
 
       setTimeout(() => {
-        document.getElementById('regForm').style.display = 'none';
-        document.getElementById('successMsg').style.display = 'block';
+        document.getElementById('regForm').style.display = 'none'; document.getElementById('successMsg').style.display = 'block';
         window.scrollTo({ top: document.querySelector('.register-section').offsetTop - 80, behavior: 'smooth' });
         triggerConfetti();
       }, 600);
     } catch (error) {
-      alert("抱歉，系統發生錯誤，請稍後再試！");
-      submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false;
+      alert("抱歉，系統發生錯誤，請稍後再試！"); submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false;
     }
   }
 
   function triggerConfetti() {
-    var duration = 3000;
-    var end = Date.now() + duration;
+    var end = Date.now() + 3000;
     (function frame() {
       confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#e94560', '#2ecc71', '#f1c40f'] });
       confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#e94560', '#2ecc71', '#f1c40f'] });
-      if (Date.now() < end) { requestAnimationFrame(frame); }
+      if (Date.now() < end) requestAnimationFrame(frame);
     }());
   }
 
-  // ======================================================
-  // QR CODE
-  // ======================================================
   window.addEventListener('load', () => {
-    const url = window.location.href.split('#')[0];
-    document.getElementById('qr-url').textContent = url;
+    const url = window.location.href.split('#')[0]; document.getElementById('qr-url').textContent = url;
     new QRCode(document.getElementById('qrcode'), { text: url, width: 200, height: 200, colorDark: '#1a1a2e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
     applyTranslations();
   });
 
   function downloadQR() {
-    const canvas = document.querySelector('#qrcode canvas');
-    if (!canvas) return;
+    const canvas = document.querySelector('#qrcode canvas'); if (!canvas) return;
     const link = document.createElement('a'); link.download = 'FitZone_QRCode.png'; link.href = canvas.toDataURL(); link.click();
   }
-  function copyURL() {
-    navigator.clipboard.writeText(window.location.href.split('#')[0]).then(() => alert('✅ ' + (currentLang === 'ja' ? 'URLをコピーしました！' : currentLang === 'en' ? 'URL copied!' : '網址已複製！')));
-  }
+  function copyURL() { navigator.clipboard.writeText(window.location.href.split('#')[0]).then(() => alert('✅ ' + (currentLang === 'ja' ? 'URLをコピーしました！' : currentLang === 'en' ? 'URL copied!' : '網址已複製！'))); }
 
-  // ======================================================
-  // ADMIN MODAL & DASHBOARD
-  // ======================================================
   function openAdmin() { document.getElementById('adminModal').classList.add('active'); setTimeout(() => document.getElementById('pwInput').focus(), 100); }
   function closeAdmin() { document.getElementById('adminModal').classList.remove('active'); document.getElementById('adminLogin').style.display = 'block'; document.getElementById('adminDash').style.display = 'none'; document.getElementById('pwInput').value = ''; document.getElementById('pwErr').textContent = ''; }
   function checkPW() {
-    if (document.getElementById('pwInput').value === ADMIN_PW) {
-      document.getElementById('adminLogin').style.display = 'none'; document.getElementById('adminDash').style.display = 'block'; loadDashboard();
-    } else { document.getElementById('pwErr').textContent = t('admin_error_password'); }
+    if (document.getElementById('pwInput').value === ADMIN_PW) { document.getElementById('adminLogin').style.display = 'none'; document.getElementById('adminDash').style.display = 'block'; loadDashboard(); } 
+    else { document.getElementById('pwErr').textContent = t('admin_error_password'); }
   }
 
   function renderCharts(data) {
@@ -1005,10 +985,7 @@
     if (!data || data.length === 0) { chartsGrid.style.display = 'none'; return; }
     chartsGrid.style.display = 'grid';
 
-    const genderData = { male: 0, female: 0, other: 0 };
-    const ageData = { '< 20': 0, '20-29': 0, '30-39': 0, '40-49': 0, '50+': 0 };
-    const goalsData = {}; const dietData = {};
-
+    const genderData = { male: 0, female: 0, other: 0 }, ageData = { '< 20': 0, '20-29': 0, '30-39': 0, '40-49': 0, '50+': 0 }, goalsData = {}, dietData = {};
     data.forEach(d => {
       if (genderData[d.gender] !== undefined) genderData[d.gender]++; else genderData.other++;
       const age = parseInt(d.age);
@@ -1018,7 +995,6 @@
     });
 
     Chart.defaults.font.family = "'Helvetica Neue', Arial, sans-serif"; Chart.defaults.color = '#666';
-
     const ctxGender = document.getElementById('genderChart').getContext('2d');
     chartInstances.push(new Chart(ctxGender, { type: 'doughnut', data: { labels: [t('gender_male'), t('gender_female'), t('gender_other')], datasets: [{ data: [genderData.male, genderData.female, genderData.other], backgroundColor: ['#0f3460', '#e94560', '#bdc3c7'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }));
 
@@ -1040,7 +1016,7 @@
     data.sort((a, b) => b.id - a.id); cachedData = data;
 
     const goals = {}, diets = {};
-    data.forEach(d => { if (d.goals) d.goals.forEach(g => { goals[g] = (goals[g]||0)+1; }); if (d.diet) diets[d.diet] = (diets[d.diet]||0)+1; });
+    data.forEach(d => { if (d.goals) d.goals.forEach(g => { goals[g] = (goals[g] || 0) + 1; }); if (d.diet) diets[d.diet] = (diets[d.diet]||0)+1; });
     const topGoal = Object.entries(goals).sort((a,b)=>b[1]-a[1])[0];
     const topDiet = Object.entries(diets).sort((a,b)=>b[1]-a[1])[0];
 
@@ -1081,98 +1057,143 @@
     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `FitZone_${new Date().toLocaleDateString()}.csv`; link.click();
   }
 
-  // ======================================================
-  // 智能分析與產品推薦邏輯 (Recommendation Logic)
-  // ======================================================
   function openRecModal(userId) {
-    const user = cachedData.find(u => u.id === userId);
-    if (!user) return;
+    const user = cachedData.find(u => u.id === userId); if (!user) return;
+    let workouts = [], products = [], dietTips = [];
+    const h = parseFloat(user.height) / 100, w = parseFloat(user.weight), bmi = w / (h * h);
 
-    let workouts = [];
-    let products = [];
-    let dietTips = [];
+    if (bmi > 27) workouts.push('⚠️ <b>BMI 偏高</b>：建議初期以「低衝擊有氧」(如游泳、室內腳踏車、橢圓機) 為主，減少膝關節負擔。');
+    if (user.goals.includes('goal_weight_loss')) workouts.push('🏃 <b>減脂燃脂</b>：高強度間歇訓練 (HIIT)、每週 3-4 次 40 分鐘有氧運動。');
+    if (user.goals.includes('goal_muscle_gain')) workouts.push('💪 <b>肌力成長</b>：每週 3-4 次重量訓練，專注於複合性動作 (深蹲、硬舉、臥推)。');
+    if (user.goals.includes('goal_posture') || user.goals.includes('goal_stress')) workouts.push('🧘 <b>體態與放鬆</b>：瑜珈、皮拉提斯、核心肌群強化與伸展放鬆。');
+    if (workouts.length === 0) workouts.push('🚶 <b>基礎保養</b>：每週 3 次、每次 30 分鐘的中等強度運動 (快走、慢跑)。');
 
-    // 計算 BMI
-    const h = parseFloat(user.height) / 100;
-    const w = parseFloat(user.weight);
-    const bmi = w / (h * h);
-
-    // 1. 健身方式推薦邏輯
-    if (bmi > 27) {
-      workouts.push('⚠️ <b>BMI 偏高</b>：建議初期以「低衝擊有氧」(如游泳、室內腳踏車、橢圓機) 為主，減少膝關節負擔。');
-    }
-    if (user.goals.includes('goal_weight_loss')) {
-      workouts.push('🏃 <b>減脂燃脂</b>：高強度間歇訓練 (HIIT)、每週 3-4 次 40 分鐘有氧運動。');
-    }
-    if (user.goals.includes('goal_muscle_gain')) {
-      workouts.push('💪 <b>肌力成長</b>：每週 3-4 次重量訓練，專注於複合性動作 (深蹲、硬舉、臥推)。');
-    }
-    if (user.goals.includes('goal_posture') || user.goals.includes('goal_stress')) {
-      workouts.push('🧘 <b>體態與放鬆</b>：瑜珈、皮拉提斯、核心肌群強化與伸展放鬆。');
-    }
-    if (workouts.length === 0) {
-      workouts.push('🚶 <b>基礎保養</b>：每週 3 次、每次 30 分鐘的中等強度運動 (快走、慢跑)。');
-    }
-
-    // 2. 產品/補劑推薦邏輯
     if (user.goals.includes('goal_muscle_gain') || user.goals.includes('goal_fitness')) {
-      // 根據飲食與過敏過濾蛋白粉種類
-      if (user.diet === 'diet_vegan' || user.diet === 'diet_vegetarian') {
-        products.push('🌱 <b>植物性蛋白粉</b> (大豆/豌豆/玄米蛋白) - 適合素食者增肌。');
-      } else if (user.allergies.includes('allergy_lactose')) {
-        products.push('🥛 <b>分離乳清蛋白 (Isolate)</b> - 去除乳糖，避免腸胃不適。');
-      } else {
-        products.push('🥛 <b>濃縮乳清蛋白 (Whey)</b> - 提供高性價比的優質蛋白質。');
-      }
+      if (user.diet === 'diet_vegan' || user.diet === 'diet_vegetarian') products.push('🌱 <b>植物性蛋白粉</b> (大豆/豌豆/玄米蛋白) - 適合素食者增肌。');
+      else if (user.allergies.includes('allergy_lactose')) products.push('🥛 <b>分離乳清蛋白 (Isolate)</b> - 去除乳糖，避免腸胃不適。');
+      else products.push('🥛 <b>濃縮乳清蛋白 (Whey)</b> - 提供高性價比的優質蛋白質。');
       products.push('⚡ <b>一水肌酸 (Creatine)</b> - 提升肌肉爆發力與高強度訓練表現。');
     }
     if (user.goals.includes('goal_weight_loss')) {
       products.push('🍵 <b>無糖綠茶萃取物 / 左旋肉鹼</b> - 輔助提升基礎代謝率與脂肪酸運輸。');
-      if(user.diet === 'diet_keto' || user.diet === 'diet_low_carb') {
-        products.push('🥥 <b>MCT 油 (中鏈脂肪酸)</b> - 快速提供能量，適合低碳/生酮飲食。');
-      }
+      if(user.diet === 'diet_keto' || user.diet === 'diet_low_carb') products.push('🥥 <b>MCT 油 (中鏈脂肪酸)</b> - 快速提供能量，適合低碳/生酮飲食。');
     }
     if (user.goals.includes('goal_health') || user.goals.includes('goal_stress')) {
       products.push('🐟 <b>高濃度魚油 (Omega-3)</b> - 幫助抗發炎並保護心血管健康。');
       products.push('💊 <b>綜合維他命 / B群</b> - 補充日常飲食不足的微量營養素，舒緩疲勞。');
     }
-    if (user.allergies.includes('allergy_none') === false) {
-      products.push('⚠️ <i>系統已避開您的過敏原，請在購買任何產品前再次確認成分標示。</i>');
-    }
+    if (user.allergies.includes('allergy_none') === false) products.push('⚠️ <i>系統已避開您的過敏原，請在購買任何產品前再次確認成分標示。</i>');
 
-    // 3. 飲食調整建議
-    if (user.diet === 'diet_keto') {
-      dietTips.push('🥑 <b>生酮飲食</b>：注意補充電解質 (鈉、鉀、鎂)，多攝取優質油脂 (酪梨、橄欖油、堅果)。');
-    } else if (user.goals.includes('goal_weight_loss')) {
-      dietTips.push('🥗 <b>減重飲食</b>：保持每日熱量赤字 300-500 大卡，增加膳食纖維攝取以提升飽足感。');
-    } else if (user.goals.includes('goal_muscle_gain')) {
-      dietTips.push('🥩 <b>增肌飲食</b>：確保每日蛋白質攝取量達「體重(kg) x 1.6~2.0 克」，並保持輕微的熱量盈餘。');
-    }
-    if (user.meals === 'meals_irregular') {
-      dietTips.push('⏰ <b>進食頻率</b>：建議養成定時定量的進食習慣，避免因過度飢餓導致暴飲暴食。');
-    }
+    if (user.diet === 'diet_keto') dietTips.push('🥑 <b>生酮飲食</b>：注意補充電解質 (鈉、鉀、鎂)，多攝取優質油脂 (酪梨、橄欖油、堅果)。');
+    else if (user.goals.includes('goal_weight_loss')) dietTips.push('🥗 <b>減重飲食</b>：保持每日熱量赤字 300-500 大卡，增加膳食纖維攝取以提升飽足感。');
+    else if (user.goals.includes('goal_muscle_gain')) dietTips.push('🥩 <b>增肌飲食</b>：確保每日蛋白質攝取量達「體重(kg) x 1.6~2.0 克」，並保持輕微的熱量盈餘。');
+    if (user.meals === 'meals_irregular') dietTips.push('⏰ <b>進食頻率</b>：建議養成定時定量的進食習慣，避免因過度飢餓導致暴飲暴食。');
 
-    // 渲染到 Modal
     document.getElementById('recUserName').innerText = user.name;
     document.getElementById('recWorkout').innerHTML = '<ul>' + workouts.map(w => `<li>${w}</li>`).join('') + '</ul>';
     document.getElementById('recProducts').innerHTML = '<ul>' + products.map(p => `<li>${p}</li>`).join('') + '</ul>';
     document.getElementById('recDiet').innerHTML = '<ul>' + (dietTips.length > 0 ? dietTips.map(d => `<li>${d}</li>`).join('') : '<li>保持目前的飲食習慣，並確保充足的水分攝取。</li>') + '</ul>';
-
     document.getElementById('recModal').classList.add('active');
   }
 
-  function closeRecModal() {
-    document.getElementById('recModal').classList.remove('active');
-  }
+  function closeRecModal() { document.getElementById('recModal').classList.remove('active'); }
   function forceDownloadPoster(){
-  const url = "FitZone_poster.jpg";
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = "FitZone_宣傳海報.jpg";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+    const a = document.createElement('a'); a.href = "FitZone_poster.jpg"; a.download = "FitZone_宣傳海報.jpg";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  }
+
+  // ======================================================
+  // AI 智能客服 (AI Chatbot Logic)
+  // ======================================================
+  function toggleAIChat() {
+    const win = document.getElementById('aiChatWindow');
+    win.classList.toggle('active');
+    if (win.classList.contains('active')) {
+      document.getElementById('aiChatInput').focus();
+    }
+  }
+
+  function sendAIMessage() {
+    const input = document.getElementById('aiChatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // 顯示使用者訊息
+    appendChatMessage(text, 'user');
+    input.value = '';
+
+    // 顯示打字動畫
+    const typing = document.getElementById('aiTyping');
+    const body = document.getElementById('aiChatBody');
+    body.appendChild(typing); // 將動畫移到最下方
+    typing.style.display = 'block';
+    body.scrollTop = body.scrollHeight;
+
+    // 模擬 AI 思考延遲與回覆
+    setTimeout(() => {
+      typing.style.display = 'none';
+      const reply = getMockAIResponse(text);
+      appendChatMessage(reply, 'bot');
+    }, 1200 + Math.random() * 800);
+  }
+
+  function appendChatMessage(text, sender) {
+    const body = document.getElementById('aiChatBody');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `ai-msg ${sender}`;
+    // 若為機器人回覆，允許簡單 HTML 渲染 (如粗體或換行)；若為使用者輸入則使用 textContent 防止 XSS
+    if (sender === 'bot') {
+      msgDiv.innerHTML = text;
+    } else {
+      msgDiv.textContent = text;
+    }
+    
+    // 插入在打字動畫之前
+    const typing = document.getElementById('aiTyping');
+    body.insertBefore(msgDiv, typing);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // 模擬 AI 關鍵字回覆邏輯
+  function getMockAIResponse(text) {
+    const lower = text.toLowerCase();
+    
+    if (currentLang === 'en') {
+      if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) 
+        return "Our pricing varies based on your personalized plan. Please download our poster in the <b>Reference section</b> for detailed pricing!";
+      if (lower.includes('diet') || lower.includes('food')) 
+        return "We provide customized diet plans including Keto, Vegan, and High Protein diets. You can select your preference in the registration form.";
+      if (lower.includes('weight loss') || lower.includes('fat')) 
+        return "Weight loss is our most popular goal! We recommend combining a caloric deficit with HIIT training. Fill out the form and we'll create a plan for you.";
+      if (lower.includes('register') || lower.includes('join')) 
+        return "You can start by filling out the <b>Registration Form</b> on this page. Once submitted, our trainers will contact you shortly!";
+      return "Thanks for your message! Our team will get back to you soon, or you can fill out the registration form to start your fitness journey.";
+    } 
+    else if (currentLang === 'ja') {
+      if (lower.includes('料金') || lower.includes('いくら') || lower.includes('費用')) 
+        return "料金はプランによって異なります。詳細については、ページ下部の「参考資料」からポスターをダウンロードしてご確認ください。";
+      if (lower.includes('ダイエット') || lower.includes('減量')) 
+        return "ダイエットは最も人気のある目標です！食事管理とトレーニングを組み合わせたプランをご提案します。まずはフォームからご登録ください。";
+      if (lower.includes('食事') || lower.includes('食べる')) 
+        return "ケトジェニックやヴィーガンなど、お客様のライフスタイルに合わせた食事プランを提供しています。";
+      return "メッセージありがとうございます！詳細はフォームからご登録いただくか、専門スタッフからの連絡をお待ちください。";
+    } 
+    else {
+      // 繁體中文預設
+      if (lower.includes('價格') || lower.includes('費用') || lower.includes('多少錢') || lower.includes('收費')) 
+        return "我們的收費標準會根據您選擇的個人化方案有所不同，建議您可以至網頁下方的<b>「參考資料」</b>下載我們的價目表與海報了解詳情喔！";
+      if (lower.includes('減肥') || lower.includes('減重') || lower.includes('瘦')) 
+        return "減重是我們最熱門的目標之一！💪<br>我們建議結合「熱量赤字」的飲食與「高強度間歇/有氧」訓練，您可以在報名表中勾選，我們會為您量身打造專屬菜單。";
+      if (lower.includes('報名') || lower.includes('參加') || lower.includes('加入')) 
+        return "您可以直接在網頁上方的<b>「立即報名」</b>區塊填寫您的基本資料與健康狀況，提交後我們會有專人與您聯繫！";
+      if (lower.includes('飲食') || lower.includes('吃') || lower.includes('菜單')) 
+        return "我們提供多種飲食建議（如生酮、低碳、高蛋白等），並會根據您的 TDEE 與目標為您計算每日建議攝取熱量，讓您吃得健康又沒有負擔 🥗";
+      if (lower.includes('教練') || lower.includes('上課')) 
+        return "我們擁有專業的教練團隊，提供一對一指導與線上諮詢，確保您的每一個動作都安全且有效！";
+      
+      return "謝謝您的提問！這部分建議您可以直接填寫報名表，我們的專業教練會為您提供更詳細的一對一諮詢服務喔！✨";
+    }
+  }
 </script>
 </body>
 </html>
