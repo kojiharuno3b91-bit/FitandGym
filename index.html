@@ -715,65 +715,54 @@ nav .logo { font-size: 1.1rem; }
 
 <!-- ===================== SCRIPTS ===================== -->
 <script>
-// ==================== Supabase 設定 ====================
-const SUPABASE_URL = 'https://hexftwgbxclvvvyvlfvl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_uog5r7nu1xEL0MbH_91BhA_phI85kMe';
-
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let cachedData = [];
-let realtimeSubscription = null;
-let chartInstances = [];
-
-// ==================== 提交報名 ====================
+// ==================== 表單提交（使用 Supabase）===================
 async function submitForm(e) {
-  e.preventDefault();
-  
-  const getCheckedVals = (sel) => [...document.querySelectorAll(sel + ' input[type="checkbox"]:checked')].map(i => i.value);
-  
-  const record = {
-    name: document.getElementById('f_name').value.trim(),
-    gender: document.getElementById('f_gender').value,
-    age: parseInt(document.getElementById('f_age').value),
-    phone: document.getElementById('f_phone').value.trim(),
-    email: document.getElementById('f_email').value.trim(),
-    height: parseFloat(document.getElementById('f_height').value),
-    weight: parseFloat(document.getElementById('f_weight').value),
-    goals: getCheckedVals('#goals'),
-    exercise: document.getElementById('f_exercise').value,
-    diet: document.getElementById('f_diet').value,
-    meals: document.getElementById('f_meals').value,
-    allergies: [],
-    supplements: [],
-    note: document.getElementById('f_note').value.trim(),
-  };
+    e.preventDefault();
+    
+    const getCheckedVals = (sel) => [...document.querySelectorAll(sel + ' input[type="checkbox"]:checked')]
+        .map(i => i.value);
 
-  // 處理過敏與補充品
-  document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb => {
-    if (['allergy_gluten','allergy_lactose','allergy_nuts','allergy_seafood','allergy_eggs','allergy_none'].includes(cb.value))
-      record.allergies.push(cb.value);
-    if (['supp_protein','supp_vitamins','supp_fish_oil','supp_creatine','supp_none'].includes(cb.value))
-      record.supplements.push(cb.value);
-  });
+    const record = {
+        name: document.getElementById('f_name').value.trim(),
+        gender: document.getElementById('f_gender').value,
+        age: parseInt(document.getElementById('f_age').value),
+        phone: document.getElementById('f_phone').value.trim(),
+        email: document.getElementById('f_email').value.trim(),
+        height: parseFloat(document.getElementById('f_height').value),
+        weight: parseFloat(document.getElementById('f_weight').value),
+        goals: getCheckedVals('#goals'),
+        exercise: document.getElementById('f_exercise').value,
+        diet: document.getElementById('f_diet').value,
+        meals: document.getElementById('f_meals').value,
+        allergies: getCheckedVals(''), // 可再優化
+        supplements: [],
+        note: document.getElementById('f_note').value.trim(),
+    };
 
-  const submitBtn = document.querySelector('.submit-btn');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '⏳ 提交中...';
-  submitBtn.disabled = true;
+    // 處理 allergies & supplements
+    document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb => {
+        if (cb.value.startsWith('allergy_')) record.allergies.push(cb.value);
+        if (cb.value.startsWith('supp_')) record.supplements.push(cb.value);
+    });
 
-  const { error } = await supabase.from('participants').insert([record]);
+    const submitBtn = document.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '⏳ 提交中...';
+    submitBtn.disabled = true;
 
-  if (error) {
-    console.error(error);
-    alert('提交失敗：' + error.message);
-  } else {
-    document.getElementById('regForm').style.display = 'none';
-    document.getElementById('successMsg').style.display = 'block';
-    triggerConfetti();
-  }
+    const { error } = await supabase.from('participants').insert([record]);
 
-  submitBtn.innerHTML = originalText;
-  submitBtn.disabled = false;
+    if (error) {
+        console.error(error);
+        alert('提交失敗：' + error.message);
+    } else {
+        document.getElementById('regForm').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+        triggerConfetti();
+    }
+
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
 }
 
 // ==================== 載入後台 + 實時監聽 ====================
@@ -837,20 +826,16 @@ function renderDashboard(data) {
   `).join('');
 }
 
-// 啟動實時訂閱
+// 實時監聽
 function startRealtime() {
-  if (realtimeSubscription) realtimeSubscription.unsubscribe();
-
-  realtimeSubscription = supabase
-    .channel('participants_realtime')
-    .on('postgres_changes', 
-      { event: '*', schema: 'public', table: 'participants' },
-      (payload) => {
-        console.log('新資料更新！', payload);
-        loadDashboard();   // 立即刷新
-      }
-    )
-    .subscribe();
+    if (realtimeSubscription) realtimeSubscription.unsubscribe();
+    
+    realtimeSubscription = supabase
+        .channel('participants_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, 
+            () => loadDashboard()
+        )
+        .subscribe();
 }
 
 // 管理後台開啟時啟動
@@ -1060,15 +1045,22 @@ document.getElementById('ha_bmr').innerText = '--'; document.getElementById('ha_
 } else { panel.style.display = 'none'; }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-initObserver(); initProgressBar();
-['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'].forEach(id => {
-document.getElementById(id).addEventListener('input', updateHealthAnalysis);
-document.getElementById(id).addEventListener('change', updateHealthAnalysis);
+window.addEventListener('load', () => {
+    initObserver();
+    initProgressBar();
+    applyTranslations();
+    
+    // QR Code
+    const url = window.location.href.split('#')[0];
+    document.getElementById('qr-url').textContent = url;
+    new QRCode(document.getElementById('qrcode'), {
+        text: url,
+        width: 200,
+        height: 200,
+        colorDark: "#1a1a2e",
+        colorLight: "#ffffff"
+    });
 });
-document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => cb.addEventListener('change', updateHealthAnalysis));
-});
-
 const ADMIN_PW  = 'fitadmin2024';
 let cachedData = [];
 
