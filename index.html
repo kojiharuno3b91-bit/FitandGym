@@ -757,6 +757,7 @@ async function submitForm(e) {
   });
 
   const submitBtn = document.querySelector('.submit-btn');
+  const originalText = submitBtn.innerHTML;
   submitBtn.innerHTML = '⏳ 提交中...';
   submitBtn.disabled = true;
 
@@ -771,7 +772,7 @@ async function submitForm(e) {
     triggerConfetti();
   }
 
-  submitBtn.innerHTML = '🚀 提交報名資料';
+  submitBtn.innerHTML = originalText;
   submitBtn.disabled = false;
 }
 
