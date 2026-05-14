@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>FitZone 健身計劃報名系統</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FitZone 健身計劃報名系統</title>
 
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- QR Code -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<!-- 引入 QR Code 套件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- 引入 Chart.js 圖表套件 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 引入 Confetti 撒花特效套件 -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
 :root {
@@ -715,143 +713,6 @@ nav .logo { font-size: 1.1rem; }
 
 <!-- ===================== SCRIPTS ===================== -->
 <script>
-// ==================== 表單提交（使用 Supabase）===================
-async function submitForm(e) {
-    e.preventDefault();
-    
-    const getCheckedVals = (sel) => [...document.querySelectorAll(sel + ' input[type="checkbox"]:checked')]
-        .map(i => i.value);
-
-    const record = {
-        name: document.getElementById('f_name').value.trim(),
-        gender: document.getElementById('f_gender').value,
-        age: parseInt(document.getElementById('f_age').value),
-        phone: document.getElementById('f_phone').value.trim(),
-        email: document.getElementById('f_email').value.trim(),
-        height: parseFloat(document.getElementById('f_height').value),
-        weight: parseFloat(document.getElementById('f_weight').value),
-        goals: getCheckedVals('#goals'),
-        exercise: document.getElementById('f_exercise').value,
-        diet: document.getElementById('f_diet').value,
-        meals: document.getElementById('f_meals').value,
-        allergies: getCheckedVals(''), // 可再優化
-        supplements: [],
-        note: document.getElementById('f_note').value.trim(),
-    };
-
-    // 處理 allergies & supplements
-    document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb => {
-        if (cb.value.startsWith('allergy_')) record.allergies.push(cb.value);
-        if (cb.value.startsWith('supp_')) record.supplements.push(cb.value);
-    });
-
-    const submitBtn = document.querySelector('.submit-btn');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '⏳ 提交中...';
-    submitBtn.disabled = true;
-
-    const { error } = await supabase.from('participants').insert([record]);
-
-    if (error) {
-        console.error(error);
-        alert('提交失敗：' + error.message);
-    } else {
-        document.getElementById('regForm').style.display = 'none';
-        document.getElementById('successMsg').style.display = 'block';
-        triggerConfetti();
-    }
-
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-}
-
-// ==================== 載入後台 + 實時監聽 ====================
-async function loadDashboard() {
-  const { data, error } = await supabase
-    .from('participants')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  cachedData = data || [];
-  renderDashboard(cachedData);
-}
-
-function renderDashboard(data) {
-  // 統計卡片（保持你原本邏輯）
-  const goals = {}, diets = {};
-  data.forEach(d => {
-    if (d.goals) d.goals.forEach(g => goals[g] = (goals[g] || 0) + 1);
-    if (d.diet) diets[d.diet] = (diets[d.diet] || 0) + 1;
-  });
-
-  const topGoal = Object.entries(goals).sort((a,b)=>b[1]-a[1])[0];
-  const topDiet = Object.entries(diets).sort((a,b)=>b[1]-a[1])[0];
-
-  document.getElementById('statCards').innerHTML = `
-    <div class="stat-card"><div class="num">${data.length}</div><div class="lbl">${t('stat_total')}</div></div>
-    <div class="stat-card"><div class="num" style="font-size:1.1rem">${topGoal ? t(topGoal[0]) : '-'}</div><div class="lbl">${t('stat_top_goal')}</div></div>
-    <div class="stat-card"><div class="num" style="font-size:1.1rem">${topDiet ? t(topDiet[0]) : '-'}</div><div class="lbl">${t('stat_top_diet')}</div></div>
-    <div class="stat-card"><div class="num">${data.filter(d=>d.gender==='male').length}</div><div class="lbl">${t('stat_male_count')}</div></div>
-    <div class="stat-card"><div class="num">${data.filter(d=>d.gender==='female').length}</div><div class="lbl">${t('stat_female_count')}</div></div>
-  `;
-
-  renderCharts(data);
-
-  // 表格
-  const tbody = document.getElementById('tableBody');
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">${t('empty_data')}</div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = data.map((r, i) => `
-    <tr>
-      <td>${i+1}</td>
-      <td><strong>${r.name}</strong><br><small style="color:#999">${r.email||''}</small></td>
-      <td>${t(r.gender) || r.gender}</td>
-      <td>${r.age}</td>
-      <td>${r.phone}</td>
-      <td>${r.height}cm / ${r.weight}kg</td>
-      <td>${(r.goals || []).map(g => `<span class="tag tag-goal">${t(g)||g}</span>`).join('')}</td>
-      <td><span class="tag tag-diet">${t(r.diet)||''}</span></td>
-      <td>${(r.allergies || []).map(a => `<span class="tag tag-allergy">${t(a)||a}</span>`).join('')}</td>
-      <td style="max-width:160px;font-size:0.82rem">${r.note||'-'}</td>
-      <td><button class="analyze-btn" onclick="openRecModal(${r.id})">智能分析</button></td>
-    </tr>
-  `).join('');
-}
-
-// 實時監聽
-function startRealtime() {
-    if (realtimeSubscription) realtimeSubscription.unsubscribe();
-    
-    realtimeSubscription = supabase
-        .channel('participants_changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, 
-            () => loadDashboard()
-        )
-        .subscribe();
-}
-
-// 管理後台開啟時啟動
-window.addEventListener('load', () => {
-  // ... 你原本的其他初始化程式碼 (initObserver, applyTranslations 等) ...
-
-  const adminModal = document.getElementById('adminModal');
-  const observer = new MutationObserver(() => {
-    if (document.getElementById('adminDash').style.display === 'block') {
-      loadDashboard();
-      startRealtime();
-    }
-  });
-  observer.observe(adminModal, { attributes: true, attributeFilter: ['class'] });
-});
-<script>
 // ======================================================
 // i18n TRANSLATIONS
 // ======================================================
@@ -1045,22 +906,15 @@ document.getElementById('ha_bmr').innerText = '--'; document.getElementById('ha_
 } else { panel.style.display = 'none'; }
 }
 
-window.addEventListener('load', () => {
-    initObserver();
-    initProgressBar();
-    applyTranslations();
-    
-    // QR Code
-    const url = window.location.href.split('#')[0];
-    document.getElementById('qr-url').textContent = url;
-    new QRCode(document.getElementById('qrcode'), {
-        text: url,
-        width: 200,
-        height: 200,
-        colorDark: "#1a1a2e",
-        colorLight: "#ffffff"
-    });
+window.addEventListener('DOMContentLoaded', () => {
+initObserver(); initProgressBar();
+['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'].forEach(id => {
+document.getElementById(id).addEventListener('input', updateHealthAnalysis);
+document.getElementById(id).addEventListener('change', updateHealthAnalysis);
 });
+document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => cb.addEventListener('change', updateHealthAnalysis));
+});
+
 const ADMIN_PW  = 'fitadmin2024';
 let cachedData = [];
 
