@@ -243,18 +243,21 @@ url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1400&q=70&fi
 .qr-content { position: relative; z-index: 1; }
 #qr-section h2 { font-size: 1.9rem; color: white; margin-bottom: 10px; }
 #qr-section p { color: rgba(255,255,255,0.72); margin-bottom: 32px; max-width: 460px; margin-left: auto; margin-right: auto; line-height: 1.7; }
-#qrcode {
-display: inline-block; background: white; padding: 18px; border-radius: 18px; margin-bottom: 22px;
-box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: transform 0.3s;
-}
-#qrcode:hover { transform: scale(1.05) rotate(-2deg); }
+
+/* 雙 QR Code 佈局 */
+.qr-container { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 22px; }
+.qr-box { background: rgba(255,255,255,0.08); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; }
+.qr-box h3 { color: white; margin-bottom: 16px; font-size: 1.1rem; }
+.qrcode-wrapper { display: inline-block; background: white; padding: 18px; border-radius: 18px; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: transform 0.3s; }
+.qrcode-wrapper:hover { transform: scale(1.05) rotate(-2deg); }
+
 #qr-url {
 background: rgba(255,255,255,0.1); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2);
 padding: 10px 28px; border-radius: 24px; display: inline-block; font-size: 0.9rem; color: rgba(255,255,255,0.85);
 word-break: break-all; max-width: 500px;
 }
-.qr-btns { margin-top: 22px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-.qr-btn { padding: 11px 28px; border-radius: 22px; border: none; cursor: pointer; font-size: 0.92rem; font-weight: 700; transition: all 0.2s; }
+.qr-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; width: 100%; }
+.qr-btn { padding: 9px 18px; border-radius: 20px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 700; transition: all 0.2s; flex: 1; white-space: nowrap; }
 .qr-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
 .qr-btn-dl { background: var(--red); color: white; }
 .qr-btn-copy { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(6px); }
@@ -265,7 +268,7 @@ word-break: break-all; max-width: 500px;
 .reference-section p { color: #666; margin-bottom: 24px; font-size: 1rem; }
 .download-link {
 display: inline-flex; align-items: center; gap: 8px; background: var(--dark); color: white; padding: 14px 32px;
-border-radius: 30px; text-decoration: none; font-size: 1.05rem; font-weight: 700; transition: all 0.3s; box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+border-radius: 30px; text-decoration: none; font-size: 1.05rem; font-weight: 700; transition: all 0.3s; box-shadow: 0 4px 14px rgba(0,0,0,0.15); cursor: pointer;
 }
 .download-link:hover { background: var(--red); transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 25px rgba(233,69,96,0.4); }
 
@@ -662,13 +665,31 @@ nav .logo { font-size: 1.1rem; }
 <div class="qr-bg"></div>
 <div class="qr-content">
 <h2 data-i18n="qr_title">📱 掃描 QR Code 進入報名</h2>
-<p data-i18n="qr_desc">將此二維碼分享給參加者，他們可直接掃描進入本頁面填寫資料</p>
-<div id="qrcode"></div>
-<div id="qr-url">載入中...</div>
-<div class="qr-btns">
-<button class="qr-btn qr-btn-dl" onclick="downloadQR()" data-i18n="btn_download_qr">⬇️ 下載 QR Code</button>
-<button class="qr-btn qr-btn-copy" onclick="copyURL()" data-i18n="btn_copy_url">📋 複製網址</button>
+<p data-i18n="qr_desc">將二維碼分享給參加者，掃描即可報名或下載海報</p>
+
+<div class="qr-container">
+  <!-- 報名二維碼 -->
+  <div class="qr-box">
+    <h3 data-i18n="qr_reg_title">📝 報名連結</h3>
+    <div class="qrcode-wrapper" id="qrcode"></div>
+    <div class="qr-btns">
+      <button class="qr-btn qr-btn-dl" onclick="downloadQR('qrcode', 'FitZone_Registration_QR.png')" data-i18n="btn_download_qr">⬇️ 下載 QR Code</button>
+      <button class="qr-btn qr-btn-copy" onclick="copyURL()" data-i18n="btn_copy_url">📋 複製網址</button>
+    </div>
+  </div>
+  
+  <!-- 海報下載二維碼 -->
+  <div class="qr-box">
+    <h3 data-i18n="qr_poster_title">🖼️ 海報下載</h3>
+    <div class="qrcode-wrapper" id="qrcode-poster"></div>
+    <div class="qr-btns">
+      <button class="qr-btn qr-btn-dl" onclick="downloadQR('qrcode-poster', 'FitZone_Poster_QR.png')" data-i18n="btn_download_qr">⬇️ 下載 QR Code</button>
+      <button class="qr-btn qr-btn-copy" onclick="forceDownloadPoster()" data-i18n="ref_link">⬇️ 下載宣傳海報</button>
+    </div>
+  </div>
 </div>
+
+<div id="qr-url">載入中...</div>
 </div>
 </div>
 
@@ -789,7 +810,7 @@ success_title:'報名成功！', success_message:'感謝您的填寫！我們已
 admin_password_placeholder:'輸入密碼', admin_login_btn:'登入後台', admin_panel_title:'📊 管理後台', admin_error_password:'❌ 密碼錯誤，請重試',
 stat_total:'總報名人數', stat_top_goal:'最熱門目標', stat_top_diet:'最常見飲食', stat_male_count:'男性人數', stat_female_count:'女性人數',
 th_index:'#', th_name:'姓名', th_gender:'性別', th_age:'年齡', th_phone:'電話', th_height_weight:'身高/體重', th_goals:'目標', th_diet_type:'飲食', th_allergies:'過敏', th_notes:'備注', th_registered_at:'報名時間',
-qr_title:'📱 掃描 QR Code 進入報名', qr_desc:'將此二維碼分享給參加者，他們可直接掃描進入本頁面填寫資料', footer_text:'© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護', privacy_note:'🔒 您的個人資料將被嚴格保密，僅供健身計劃使用',
+qr_title:'📱 掃描 QR Code', qr_desc:'將二維碼分享給參加者，掃描即可報名或下載海報', qr_reg_title:'📝 報名連結', qr_poster_title:'🖼️ 海報下載', footer_text:'© 2026 FitZone 健身計劃系統　｜　由管理員建立並維護', privacy_note:'🔒 您的個人資料將被嚴格保密，僅供健身計劃使用',
 placeholder_name:'請輸入您的姓名', placeholder_age:'歲', placeholder_phone:'09xx-xxx-xxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'其他備注或特殊需求（選填）...', empty_data:'📭 尚無報名資料',
 chart_gender:'性別分佈', chart_age:'年齡層次', chart_goals:'熱門健身目標', chart_diet:'飲食習慣分佈',
 bmi_underweight:'過輕 🍃', bmi_normal:'正常 ✅', bmi_overweight:'過重 ⚠️', bmi_obese:'肥胖 🚨',
@@ -823,7 +844,7 @@ success_title:'Registration Successful!', success_message:'Thank you! We have re
 admin_password_placeholder:'Enter password', admin_login_btn:'Log In', admin_panel_title:'📊 Admin Dashboard', admin_error_password:'❌ Incorrect password',
 stat_total:'Total Registrations', stat_top_goal:'Top Goal', stat_top_diet:'Top Diet', stat_male_count:'Male Count', stat_female_count:'Female Count',
 th_index:'#', th_name:'Name', th_gender:'Gender', th_age:'Age', th_phone:'Phone', th_height_weight:'Height/Weight', th_goals:'Goals', th_diet_type:'Diet', th_allergies:'Allergies', th_notes:'Notes', th_registered_at:'Registered At',
-qr_title:'📱 Scan QR Code to Register', qr_desc:'Share this QR Code with participants so they can scan and register.', footer_text:'© 2026 FitZone Fitness System', privacy_note:'🔒 Your personal data is strictly protected',
+qr_title:'📱 Scan QR Code', qr_desc:'Share these QR codes to let participants register or download the poster.', qr_reg_title:'📝 Registration Link', qr_poster_title:'🖼️ Poster Download', footer_text:'© 2026 FitZone Fitness System', privacy_note:'🔒 Your personal data is strictly protected',
 placeholder_name:'Enter full name', placeholder_age:'years', placeholder_phone:'+1-xxx-xxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'e.g. 170', placeholder_weight:'e.g. 65', placeholder_notes:'Notes...', empty_data:'📭 No data yet',
 chart_gender:'Gender Distribution', chart_age:'Age Groups', chart_goals:'Popular Goals', chart_diet:'Dietary Habits',
 bmi_underweight:'Underweight 🍃', bmi_normal:'Normal ✅', bmi_overweight:'Overweight ⚠️', bmi_obese:'Obese 🚨',
@@ -857,7 +878,7 @@ success_title:'登録完了！', success_message:'ご登録ありがとうござ
 admin_password_placeholder:'パスワードを入力', admin_login_btn:'ログイン', admin_panel_title:'📊 管理ダッシュボード', admin_error_password:'❌ パスワードが間違っています',
 stat_total:'総登録者数', stat_top_goal:'最人気目標', stat_top_diet:'最多食事タイプ', stat_male_count:'男性数', stat_female_count:'女性数',
 th_index:'#', th_name:'氏名', th_gender:'性別', th_age:'年齢', th_phone:'電話番号', th_height_weight:'身長/体重', th_goals:'目標', th_diet_type:'食事', th_allergies:'アレルギー', th_notes:'備考', th_registered_at:'登録日時',
-qr_title:'📱 QRコードをスキャンして登録', qr_desc:'このQRコードを参加者に共有してください', footer_text:'© 2026 FitZone フィットネスシステム', privacy_note:'🔒 個人情報は厳重に保護されます',
+qr_title:'📱 QRコードをスキャン', qr_desc:'これらのQRコードを共有して、登録やポスターのダウンロードを行ってください。', qr_reg_title:'📝 登録リンク', qr_poster_title:'🖼️ ポスターダウンロード', footer_text:'© 2026 FitZone フィットネスシステム', privacy_note:'🔒 個人情報は厳重に保護されます',
 placeholder_name:'氏名を入力', placeholder_age:'歳', placeholder_phone:'090-xxxx-xxxx', placeholder_email:'example@email.com', placeholder_height:'例：170', placeholder_weight:'例：65', placeholder_notes:'備考...', empty_data:'📭 まだ登録データがありません',
 chart_gender:'性別分布', chart_age:'年齢層', chart_goals:'人気の目標', chart_diet:'食習慣の分布',
 bmi_underweight:'低体重 🍃', bmi_normal:'普通体重 ✅', bmi_overweight:'肥満(1度) ⚠️', bmi_obese:'肥満(2度以上) 🚨',
@@ -1092,15 +1113,29 @@ if (Date.now() < end) requestAnimationFrame(frame);
 }
 
 window.addEventListener('load', () => {
-const url = window.location.href.split('#')[0]; document.getElementById('qr-url').textContent = url;
-new QRCode(document.getElementById('qrcode'), { text: url, width: 200, height: 200, colorDark: '#1a1a2e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+const url = window.location.href.split('#')[0]; 
+document.getElementById('qr-url').textContent = url;
+
+// 1. 報名用 QR Code
+new QRCode(document.getElementById('qrcode'), { text: url, width: 180, height: 180, colorDark: '#1a1a2e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+
+// 2. 海報下載用 QR Code (假設海報路徑為當前網址目錄下的 FitZone_poster.jpg)
+const posterUrl = url.substring(0, url.lastIndexOf('/') + 1) + 'FitZone_poster.jpg';
+new QRCode(document.getElementById('qrcode-poster'), { text: posterUrl, width: 180, height: 180, colorDark: '#1a1a2e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+
 applyTranslations();
 });
 
-function downloadQR() {
-const canvas = document.querySelector('#qrcode canvas'); if (!canvas) return;
-const link = document.createElement('a'); link.download = 'FitZone_QRCode.png'; link.href = canvas.toDataURL(); link.click();
+// 下載 QR Code 的共用函數
+function downloadQR(elementId, filename) {
+const canvas = document.querySelector(`#${elementId} canvas`); 
+if (!canvas) return;
+const link = document.createElement('a'); 
+link.download = filename || 'FitZone_QRCode.png'; 
+link.href = canvas.toDataURL(); 
+link.click();
 }
+
 function copyURL() { navigator.clipboard.writeText(window.location.href.split('#')[0]).then(() => alert('✅ ' + (currentLang === 'ja' ? 'URLをコピーしました！' : currentLang === 'en' ? 'URL copied!' : '網址已複製！'))); }
 
 function openAdmin() { document.getElementById('adminModal').classList.add('active'); setTimeout(() => document.getElementById('pwInput').focus(), 100); }
