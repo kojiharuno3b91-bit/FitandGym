@@ -150,11 +150,17 @@ padding: 40px 44px; box-shadow: 0 10px 48px rgba(0,0,0,0.12); position: relative
 
 .progress-container {
 width: 100%; height: 6px; background: #e8ecf0; border-radius: 3px;
-margin-bottom: 30px; overflow: hidden;
+margin-bottom: 15px; overflow: hidden;
 }
 .progress-bar {
 height: 100%; width: 0%; background: linear-gradient(90deg, var(--red), #ff7b93);
 transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 草稿提示 */
+.draft-indicator {
+text-align: right; font-size: 0.8rem; color: var(--success); font-weight: bold;
+margin-bottom: 20px; opacity: 0; transition: opacity 0.3s; height: 15px;
 }
 
 .form-group { margin-bottom: 22px; }
@@ -294,6 +300,14 @@ display: flex; align-items: center; justify-content: center; transition: all 0.2
 #adminDash { display: none; }
 .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
 .admin-header h2 { color: var(--dark); font-size: 1.4rem; }
+
+/* 後台搜尋框 */
+.admin-search {
+  padding: 10px 16px; border: 2px solid #e8ecf0; border-radius: 20px;
+  font-size: 0.9rem; outline: none; transition: all 0.3s; min-width: 250px;
+}
+.admin-search:focus { border-color: var(--info); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15); }
+
 .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 14px; margin-bottom: 28px; }
 .stat-card { background: linear-gradient(135deg, #f7f9fc, #eef1f6); border-radius: 14px; padding: 20px 16px; text-align: center; border: 1px solid #e8ecf0; transition: transform 0.2s;}
 .stat-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -315,6 +329,11 @@ tr:hover td { background: #fafbfd; }
 .tag-allergy { background: #fce8e8; color: #e74c3c; }
 .export-btn { background: #27ae60; color: white; border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: background 0.2s; }
 .export-btn:hover { background: #219a52; }
+
+/* 刪除按鈕 */
+.delete-btn { background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; margin-top: 4px; }
+.delete-btn:hover { background: #c0392b; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3); }
+
 .empty-state { text-align: center; padding: 48px; color: #bbb; font-size: 1rem; }
 
 /* 智能分析按鈕 */
@@ -373,6 +392,17 @@ cursor: pointer; transition: all 0.2s; font-size: 1.2rem;
 .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
 .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
+/* ===== 回到頂部按鈕 ===== */
+.scroll-top-btn {
+  position: fixed; bottom: 30px; left: 30px; z-index: 999;
+  background: var(--dark); color: white; border: none;
+  width: 50px; height: 50px; border-radius: 50%;
+  cursor: pointer; font-size: 1.4rem; display: none;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3); transition: all 0.3s;
+}
+.scroll-top-btn:hover { background: var(--red); transform: translateY(-5px); }
+.scroll-top-btn.visible { display: block; animation: popIn 0.3s; }
+
 @media (max-width: 600px) {
 .form-row { grid-template-columns: 1fr; }
 .form-wrapper { padding: 30px 20px; }
@@ -380,10 +410,14 @@ cursor: pointer; transition: all 0.2s; font-size: 1.2rem;
 nav .logo { font-size: 1.1rem; }
 .modal { padding: 28px 18px; }
 .ai-chat-window { width: calc(100vw - 40px); right: -10px; bottom: 80px; height: 480px; }
+.scroll-top-btn { bottom: 20px; left: 20px; width: 44px; height: 44px; font-size: 1.2rem; }
 }
 </style>
 </head>
 <body>
+
+<!-- 一鍵回到頂部 -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
 
 <!-- LANG BAR -->
 <div class="lang-bar">
@@ -466,10 +500,11 @@ nav .logo { font-size: 1.1rem; }
 <div class="divider"></div>
 
 <div class="form-wrapper">
-<!-- 進度條 -->
+<!-- 進度條與草稿提示 -->
 <div class="progress-container">
 <div class="progress-bar" id="formProgress"></div>
 </div>
+<div class="draft-indicator" id="draftMsg" data-i18n="draft_saved">💾 草稿已自動儲存</div>
 
 <div id="successMsg">
 <div class="checkmark">✅</div>
@@ -592,7 +627,7 @@ nav .logo { font-size: 1.1rem; }
 </div>
 <div class="form-group">
 <label><span data-i18n="label_allergies">食物過敏</span></label>
-<div class="checkbox-group">
+<div class="checkbox-group" id="allergies">
 <label class="checkbox-item"><input type="checkbox" value="allergy_gluten" /> <span data-i18n="allergy_gluten">麩質</span></label>
 <label class="checkbox-item"><input type="checkbox" value="allergy_lactose" /> <span data-i18n="allergy_lactose">乳糖</span></label>
 <label class="checkbox-item"><input type="checkbox" value="allergy_nuts" /> <span data-i18n="allergy_nuts">堅果</span></label>
@@ -603,7 +638,7 @@ nav .logo { font-size: 1.1rem; }
 </div>
 <div class="form-group">
 <label><span data-i18n="label_supplements">營養補充品</span></label>
-<div class="checkbox-group">
+<div class="checkbox-group" id="supplements">
 <label class="checkbox-item"><input type="checkbox" value="supp_protein" /> <span data-i18n="supp_protein">蛋白粉</span></label>
 <label class="checkbox-item"><input type="checkbox" value="supp_vitamins" /> <span data-i18n="supp_vitamins">維他命</span></label>
 <label class="checkbox-item"><input type="checkbox" value="supp_fish_oil" /> <span data-i18n="supp_fish_oil">魚油</span></label>
@@ -669,6 +704,8 @@ nav .logo { font-size: 1.1rem; }
 <div id="adminDash">
 <div class="admin-header">
 <h2 data-i18n="admin_panel_title">📊 管理後台</h2>
+<!-- 後台搜尋功能 -->
+<input type="text" id="adminSearch" class="admin-search" data-i18n-placeholder="search_placeholder" placeholder="🔍 搜尋姓名、電話或 Email..." onkeyup="filterAdminTable()">
 <button class="export-btn" onclick="exportCSV()" data-i18n="btn_export_csv">⬇️ 匯出 CSV</button>
 </div>
 <div class="stat-cards" id="statCards"></div>
@@ -761,7 +798,8 @@ ha_fill_exercise:'💡 請繼續填寫「運動習慣」與「健身目標」以
 ha_suggest_maintain:'💡 根據您的狀態，建議每日攝取約 <strong>{kcal} 大卡</strong> 以維持目前體重。',
 ha_suggest_loss:'💡 為了達到減重目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (產生熱量缺口)。',
 ha_suggest_gain:'💡 為了達到增肌目標，建議每日攝取約 <strong>{kcal} 大卡</strong> (提供足夠熱量盈餘)。',
-th_action: '操作', btn_analyze: '🔍 智能分析', modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議',ref_title: '參考資料',
+th_action: '操作', btn_analyze: '🔍 分析', btn_delete: '🗑️ 刪除', confirm_delete: '確定要刪除這筆資料嗎？', search_placeholder: '🔍 搜尋姓名、電話或 Email...', draft_saved: '💾 草稿已自動儲存',
+modal_rec_title: '的專屬健康與產品建議', rec_workout: '🏋️ 推薦健身方式', rec_products: '💊 推薦健康產品', rec_diet: '🍽️ 飲食調整建議',ref_title: '參考資料',
 ref_desc: '點擊下方連結下載我們的最新宣傳海報與價目表', ref_link: '⬇️ 下載宣傳海報',
 ai_chat_title: '🤖 FitZone 智能客服', ai_chat_greeting: '您好！我是 FitZone 智能客服 🤖<br>請問有什麼我可以幫您的嗎？<br><small style="color:#888">（您可以問我關於報名、價格、減重或飲食的問題喔）</small>', ai_chat_placeholder: '輸入您的問題...',
 ai_generated_note: '本網頁之所有設計、程式碼及內容均由 AI 和 CASPER NG 協作生成'
@@ -794,7 +832,8 @@ ha_fill_exercise:'💡 Fill in exercise frequency and goals for personalized cal
 ha_suggest_maintain:'💡 To maintain your weight, consume approx. <strong>{kcal} kcal</strong> daily.',
 ha_suggest_loss:'💡 For weight loss, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric deficit).',
 ha_suggest_gain:'💡 For muscle gain, we recommend approx. <strong>{kcal} kcal</strong> daily (caloric surplus).',
-th_action: 'Action', btn_analyze: '🔍 Analyze', modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions', ref_title: 'Reference Materials',
+th_action: 'Action', btn_analyze: '🔍 Analyze', btn_delete: '🗑️ Delete', confirm_delete: 'Are you sure you want to delete this record?', search_placeholder: '🔍 Search name, phone or email...', draft_saved: '💾 Draft auto-saved',
+modal_rec_title: "'s Recommendations", rec_workout: '🏋️ Recommended Workout', rec_products: '💊 Recommended Products', rec_diet: '🍽️ Dietary Suggestions', ref_title: 'Reference Materials',
 ref_desc: 'Click the link below to download our latest poster and price list', ref_link: '⬇️ Download Poster',
 ai_chat_title: '🤖 FitZone AI Support', ai_chat_greeting: 'Hello! I am the FitZone AI Assistant 🤖<br>How can I help you today?<br><small style="color:#888">(Ask about pricing, registration, diets, or weight loss)</small>', ai_chat_placeholder: 'Type your question...',
 ai_generated_note: 'All designs, code, and content on this page are co-generated by AI and CASPER NG'
@@ -827,7 +866,8 @@ ha_fill_exercise:'💡 運動頻度と目標を入力すると、おすすめの
 ha_suggest_maintain:'💡 現在の体重を維持するため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします。',
 ha_suggest_loss:'💡 減量のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリー不足を作る）。',
 ha_suggest_gain:'💡 筋力増強のため、1日約 <strong>{kcal} kcal</strong> の摂取をおすすめします（カロリーの余剰を作る）。',
-th_action: '操作', btn_analyze: '🔍 分析提案', modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案', ref_title: '参考資料',
+th_action: '操作', btn_analyze: '🔍 分析', btn_delete: '🗑️ 削除', confirm_delete: 'このデータを削除してもよろしいですか？', search_placeholder: '🔍 名前、電話番号、メールで検索...', draft_saved: '💾 下書きを自動保存しました',
+modal_rec_title: 'の専用提案', rec_workout: '🏋️ おすすめのフィットネス', rec_products: '💊 おすすめの健康製品', rec_diet: '🍽️ 食事調整の提案', ref_title: '参考資料',
 ref_desc: '最新のポスターと料金表をダウンロードするには、下のリンクをクリックしてください', ref_link: '⬇️ ポスターをダウンロード',
 ai_chat_title: '🤖 FitZone AI サポート', ai_chat_greeting: 'こんにちは！FitZone AIアシスタントです 🤖<br>どのようなご用件でしょうか？<br><small style="color:#888">（料金、登録、食事、ダイエットについてご質問ください）</small>', ai_chat_placeholder: '質問を入力してください...',
 ai_generated_note: 'このページのすべてのデザイン、コード、コンテンツは、AIとCASPER NGによって共同生成されました'
@@ -836,6 +876,7 @@ ai_generated_note: 'このページのすべてのデザイン、コード、コ
 
 let currentLang = 'zh';
 let chartInstances = [];
+let saveDraftTimeout = null;
 
 function t(key) { return i18n[currentLang][key] || key; }
 
@@ -872,6 +913,62 @@ requiredInputs.forEach(input => { if (input.value.trim() !== '') filled++; });
 document.getElementById('formProgress').style.width = ((filled / requiredInputs.length) * 100) + '%';
 };
 requiredInputs.forEach(input => { input.addEventListener('input', updateProgress); input.addEventListener('change', updateProgress); });
+updateProgress();
+}
+
+// ======================================================
+// 草稿自動儲存功能 (Auto-Save Draft)
+// ======================================================
+function saveDraft() {
+  clearTimeout(saveDraftTimeout);
+  saveDraftTimeout = setTimeout(() => {
+    const getCheckedVals = (sel) => [...document.querySelectorAll(sel + ' input[type="checkbox"]:checked')].map(i => i.value);
+    const draft = {
+      name: document.getElementById('f_name').value, gender: document.getElementById('f_gender').value,
+      age: document.getElementById('f_age').value, phone: document.getElementById('f_phone').value,
+      email: document.getElementById('f_email').value, height: document.getElementById('f_height').value,
+      weight: document.getElementById('f_weight').value, goals: getCheckedVals('#goals'),
+      exercise: document.getElementById('f_exercise').value, diet: document.getElementById('f_diet').value,
+      meals: document.getElementById('f_meals').value, 
+      allergies: getCheckedVals('#allergies'), supplements: getCheckedVals('#supplements'),
+      note: document.getElementById('f_note').value
+    };
+    localStorage.setItem('fitzone_draft', JSON.stringify(draft));
+    
+    // 顯示儲存成功提示
+    const msg = document.getElementById('draftMsg');
+    msg.style.opacity = 1;
+    setTimeout(() => msg.style.opacity = 0, 2000);
+  }, 800); // 延遲 800ms 避免頻繁寫入
+}
+
+function loadDraft() {
+  const draft = JSON.parse(localStorage.getItem('fitzone_draft'));
+  if (draft) {
+    document.getElementById('f_name').value = draft.name || '';
+    document.getElementById('f_gender').value = draft.gender || '';
+    document.getElementById('f_age').value = draft.age || '';
+    document.getElementById('f_phone').value = draft.phone || '';
+    document.getElementById('f_email').value = draft.email || '';
+    document.getElementById('f_height').value = draft.height || '';
+    document.getElementById('f_weight').value = draft.weight || '';
+    document.getElementById('f_exercise').value = draft.exercise || '';
+    document.getElementById('f_diet').value = draft.diet || '';
+    document.getElementById('f_meals').value = draft.meals || '';
+    document.getElementById('f_note').value = draft.note || '';
+    
+    const setCheckboxes = (sel, arr) => {
+      if(arr) arr.forEach(val => {
+        const cb = document.querySelector(`${sel} input[value="${val}"]`);
+        if(cb) cb.checked = true;
+      });
+    };
+    setCheckboxes('#goals', draft.goals);
+    setCheckboxes('#allergies', draft.allergies);
+    setCheckboxes('#supplements', draft.supplements);
+    
+    updateHealthAnalysis();
+  }
 }
 
 function updateHealthAnalysis() {
@@ -923,12 +1020,23 @@ document.getElementById('ha_bmr').innerText = '--'; document.getElementById('ha_
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-initObserver(); initProgressBar();
-['f_height', 'f_weight', 'f_age', 'f_gender', 'f_exercise'].forEach(id => {
-document.getElementById(id).addEventListener('input', updateHealthAnalysis);
-document.getElementById(id).addEventListener('change', updateHealthAnalysis);
+initObserver(); 
+loadDraft(); // 載入草稿
+initProgressBar();
+
+// 綁定草稿儲存事件
+const formInputs = document.querySelectorAll('#regForm input, #regForm select, #regForm textarea');
+formInputs.forEach(input => {
+  input.addEventListener('input', () => { updateHealthAnalysis(); saveDraft(); });
+  input.addEventListener('change', () => { updateHealthAnalysis(); saveDraft(); });
 });
-document.querySelectorAll('#goals input[type="checkbox"]').forEach(cb => cb.addEventListener('change', updateHealthAnalysis));
+
+// 回到頂部按鈕監聽
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  if(window.scrollY > 400) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+});
 });
 
 const ADMIN_PW  = 'fitadmin2024';
@@ -963,6 +1071,8 @@ participants.push(record); localStorage.setItem('fitzone_participants', JSON.str
 
 setTimeout(() => {
 document.getElementById('regForm').style.display = 'none'; document.getElementById('successMsg').style.display = 'block';
+localStorage.removeItem('fitzone_draft'); // 提交成功後清空草稿
+document.getElementById('draftMsg').style.display = 'none';
 window.scrollTo({ top: document.querySelector('.register-section').offsetTop - 80, behavior: 'smooth' });
 triggerConfetti();
 }, 600);
@@ -1032,7 +1142,6 @@ chartInstances.push(new Chart(ctxDiet, { type: 'pie', data: { labels: Object.key
 }
 
 function loadDashboard() {
-const tbody = document.getElementById('tableBody');
 let data = JSON.parse(localStorage.getItem('fitzone_participants') || '[]');
 data.sort((a, b) => b.id - a.id); cachedData = data;
 
@@ -1050,6 +1159,12 @@ document.getElementById('statCards').innerHTML = `
    `;
 
 renderCharts(data);
+renderAdminTable(data);
+}
+
+// 獨立渲染表格，方便搜尋時不需重繪圖表
+function renderAdminTable(data) {
+const tbody = document.getElementById('tableBody');
 ['th_index','th_name','th_gender','th_age','th_phone','th_height_weight','th_goals','th_diet_type','th_allergies','th_notes','th_action'].forEach((key,i) => {
 const ths = document.querySelectorAll('#dataTable thead th'); if (ths[i]) ths[i].textContent = t(key);
 });
@@ -1064,9 +1179,34 @@ tbody.innerHTML = data.map((r,i) => `
        <td><span class="tag tag-diet">${t(r.diet)}</span><br><small>${t(r.meals)||''}</small></td>
        <td>${(r.allergies || []).map(a=>`<span class="tag tag-allergy">${t(a)||a}</span>`).join('')}</td>
        <td style="max-width:160px;font-size:0.8rem">${r.note||'-'}</td>
-       <td><button class="analyze-btn" onclick="openRecModal(${r.id})">${t('btn_analyze')}</button></td>
+       <td>
+         <button class="analyze-btn" onclick="openRecModal(${r.id})">${t('btn_analyze')}</button><br>
+         <button class="delete-btn" onclick="deleteRecord(${r.id})">${t('btn_delete')}</button>
+       </td>
      </tr>
    `).join('');
+}
+
+// ======================================================
+// 後台搜尋與刪除功能
+// ======================================================
+function filterAdminTable() {
+  const term = document.getElementById('adminSearch').value.toLowerCase();
+  const filtered = cachedData.filter(d => 
+    d.name.toLowerCase().includes(term) || 
+    d.phone.includes(term) || 
+    (d.email && d.email.toLowerCase().includes(term))
+  );
+  renderAdminTable(filtered);
+}
+
+function deleteRecord(id) {
+  if (confirm(t('confirm_delete'))) {
+    let data = JSON.parse(localStorage.getItem('fitzone_participants') || '[]');
+    data = data.filter(d => d.id !== id);
+    localStorage.setItem('fitzone_participants', JSON.stringify(data));
+    loadDashboard(); // 重新載入儀表板
+  }
 }
 
 function exportCSV() {
