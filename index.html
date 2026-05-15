@@ -40,6 +40,22 @@ body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f4f8; co
 .floating:nth-child(3) { animation-delay: 0.8s; }
 .floating:nth-child(4) { animation-delay: 1.2s; }
 
+/* ===== 趣味震動特效 ===== */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+.shake { animation: shake 0.5s; animation-iteration-count: 1; }
+
 /* ===== LANG SWITCHER ===== */
 .lang-bar {
 background: rgba(10,10,20,0.92); backdrop-filter: blur(8px);
@@ -1137,6 +1153,15 @@ body.scrollTop = body.scrollHeight;
 // 模擬 AI 思考延遲與回覆
 setTimeout(() => {
 typing.style.display = 'none';
+
+// 趣味彩蛋：觸發撒花與震動特效
+if (text.toLowerCase().includes('casper')) {
+    triggerConfetti(); // 觸發撒花
+    const chatWindow = document.getElementById('aiChatWindow');
+    chatWindow.classList.add('shake'); // 加入震動 class
+    setTimeout(() => chatWindow.classList.remove('shake'), 500); // 移除震動 class
+}
+
 const reply = getMockAIResponse(text);
 appendChatMessage(reply, 'bot');
 }, 1200 + Math.random() * 800);
@@ -1163,9 +1188,14 @@ body.scrollTop = body.scrollHeight;
 function getMockAIResponse(text) {
 const lower = text.toLowerCase();
 
-// 新增尋找 Casper 的彩蛋回覆
+// 新增尋找 Casper 的趣味彩蛋回覆 (隨機抽出)
 if (lower.includes('casper')) {
-  return "需要找Casper，請付費💰"; 
+  const casperReplies = [
+    "🚨 <b>警告：您已觸發隱藏彩蛋！</b><br>想召喚傳說中的 <b>Casper</b> 大神嗎？<br>請先準備好您的魔法小卡 💳，付費解鎖此進階功能！💸👻",
+    "👻 呼叫 Casper 失敗！<br>系統提示：您的餘額不足以支付出場費 💰，請儲值後再試！😂",
+    "✨ 恭喜發現隱藏人物！<br>不過 Casper 現在很忙，如果您願意支付 999 枚金幣 🪙，我可以幫您插隊喔！😎"
+  ];
+  return casperReplies[Math.floor(Math.random() * casperReplies.length)];
 }
 
 if (currentLang === 'en') {
