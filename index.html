@@ -1163,6 +1163,11 @@ body.scrollTop = body.scrollHeight;
 function getMockAIResponse(text) {
 const lower = text.toLowerCase();
 
+// 新增尋找 Casper 的彩蛋回覆
+if (lower.includes('casper')) {
+  return "需要找Casper，請付費💰"; 
+}
+
 if (currentLang === 'en') {
 if (lower.includes('price') || lower.includes('cost') || lower.includes('how much')) 
 return "Our pricing varies based on your personalized plan. Please download our poster in the <b>Reference section</b> for detailed pricing!";
